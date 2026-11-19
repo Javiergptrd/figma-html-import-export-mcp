@@ -1,5 +1,5 @@
 {
-  "name": "html-import-export-mcp",
+  "name": "figma-html-import-export-mcp",
   "version": "1.0.0",
   "description": "MCP server and Figma plugin that import HTML into Figma, export Figma frames to HTML, and let Claude design directly on the Figma canvas.",
   "keywords": [
@@ -15,7 +15,7 @@
   "type": "module",
   "main": "server/index.js",
   "bin": {
-    "html-import-export-mcp": "server/index.js"
+    "figma-html-import-export-mcp": "server/index.js"
   },
   "files": [
     "server/",
@@ -30,7 +30,8 @@
     "test": "node scripts/build-plugin.js --check && node test/e2e-mcp.js && node test/e2e-plugin.js",
     "test:plugin": "node test/e2e-plugin.js",
     "test:import": "node test/run-import.js",
-    "test:design": "node test/run-import.js --design test/design-sample.json"
+    "test:design": "node test/run-import.js --design test/design-sample.json",
+    "release": "node scripts/package-release.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",

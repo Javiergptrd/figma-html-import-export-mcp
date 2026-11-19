@@ -33,7 +33,7 @@ const transport = new StdioClientTransport({
   env: process.env,
   stderr: 'ignore',
 });
-const client = new Client({ name: 'html-import-export-mcp-cli', version: '1.0.0' });
+const client = new Client({ name: 'figma-html-import-export-mcp-cli', version: '1.0.0' });
 await client.connect(transport);
 const textOf = (r) => (r.content || []).filter((c) => c.type === 'text').map((c) => c.text).join('\n');
 

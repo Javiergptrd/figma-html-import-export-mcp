@@ -12,7 +12,7 @@ import { resolveAssets } from './assets.js';
 const PORT = parseInt(process.env.HTML_MCP_PORT || '3055', 10);
 const bridge = new FigmaBridge(PORT);
 
-const server = new McpServer({ name: 'html-import-export-mcp', version: '1.0.0' });
+const server = new McpServer({ name: 'figma-html-import-export-mcp', version: '1.0.0' });
 
 const text = (t) => ({ content: [{ type: 'text', text: typeof t === 'string' ? t : JSON.stringify(t, null, 2) }] });
 const fail = (e) => ({ content: [{ type: 'text', text: `Error: ${e?.message || e}` }], isError: true });

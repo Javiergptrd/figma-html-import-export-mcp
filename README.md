@@ -1,7 +1,31 @@
-# HTML Import, Export and MCP Service Plugin
+# HTML Import, Export and MCP Service Plugin for Figma
 
-A Figma plugin plus an MCP server that **imports HTML pages into Figma as editable layers**,
-**exports Figma frames as HTML**, and lets Claude **create or edit designs directly on the Figma canvas**.
+A free, open-source **Figma plugin** that **imports HTML pages into Figma as editable layers** and
+**exports Figma frames as clean HTML**, plus an optional **MCP server** that lets Claude
+**create or edit designs directly on the Figma canvas**.
+
+![The plugin window: Import, Export and Claude tabs](docs/images/plugin-tabs.png)
+
+![An HTML page imported into Figma as editable layers](docs/images/import-example.png)
+
+## Install the Figma plugin (no command line)
+
+Import and Export work on their own. You don't need Node, Claude or a terminal for them.
+
+1. Download **`figma-plugin.zip`** from the
+   [latest release](https://github.com/Javiergptrd/figma-html-import-export-mcp/releases/latest)
+   and unzip it.
+2. Open **Figma Desktop** (the browser version can't load local plugins) and open any design file.
+3. Go to **Plugins → Development → Import plugin from manifest…** and choose `manifest.json`
+   inside the unzipped `figma-plugin` folder.
+4. Run it from **Plugins → Development → HTML Import, Export and MCP Service Plugin**.
+
+Keep the unzipped folder where it is: Figma loads the plugin from it each time.
+
+## Use it with Claude (optional)
+
+The **Claude** tab connects the plugin to an MCP server running on your computer, so Claude Code can
+import pages, build layouts and export frames for you.
 
 ```
 Claude Code ──stdio──▶ MCP server (Node) ──WebSocket :3055──▶ Figma plugin ──▶ Figma canvas
@@ -13,26 +37,28 @@ Figma's REST API cannot create layers, so writing to a file has to go through a 
 inside Figma. The MCP server hosts a local WebSocket (127.0.0.1 only), and the plugin connects to it
 and carries out the server's commands.
 
-The plugin can also **import HTML on its own**, with no Claude and no server running: see
-[Import from the plugin window](#import-from-the-plugin-window).
+### Setup (one time)
 
-## Setup (one time)
-
-1. **Get the code and install dependencies.** Needs Node 18+, Figma Desktop, and Google Chrome,
-   Chromium, Edge or Brave installed. Clone or download this repository, then:
+1. **Get the server.** Needs Node 18+, Figma Desktop, and Google Chrome, Chromium, Edge or Brave.
+   Either download **`figma-html-import-export-mcp-full.zip`** from the
+   [latest release](https://github.com/Javiergptrd/figma-html-import-export-mcp/releases/latest)
+   (dependencies included, nothing to install) and unzip it, or clone the repository and install:
    ```bash
-   cd html-import-export-mcp && npm install
+   git clone https://github.com/Javiergptrd/figma-html-import-export-mcp.git
+   ```
+   ```bash
+   cd figma-html-import-export-mcp && npm install
    ```
 2. **Register the MCP server** with Claude Code:
    ```bash
-   claude mcp add html-import-export-mcp -- node "/absolute/path/to/html-import-export-mcp/server/index.js"
+   claude mcp add figma-html-import-export-mcp -- node "/absolute/path/to/figma-html-import-export-mcp/server/index.js"
    ```
    Restart Claude Code (or run `/mcp`) so it starts the server.
 3. **Load the plugin in Figma Desktop.** Open any design file, then go to
    **Plugins → Development → Import plugin from manifest…** and choose
-   `html-import-export-mcp/figma-plugin/manifest.json`.
+   `figma-html-import-export-mcp/figma-plugin/manifest.json`.
 
-## Each session
+### Each session
 
 In Figma Desktop, open the file you want to work in and run
 **Plugins → Development → HTML Import, Export and MCP Service Plugin → Open plugin window**. Leave its small window open. The window has three tabs: **Import**
@@ -206,6 +232,7 @@ node test/e2e-plugin.js [page.html]        # plugin window imports a file by its
 node test/run-import.js page.html out/     # import + render the Figma result back to a PNG for comparison
 node test/screenshot.js page.html out.png  # browser screenshot of the original
 npm run test:design                        # create_design sample (auto layout)
+npm run release                            # build the release zips in dist/
 ```
 
 Files: `server/index.js` (MCP tools), `server/walker.js` (DOM → layer tree, runs in Chrome),
