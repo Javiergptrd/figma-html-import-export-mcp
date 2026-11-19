@@ -1,255 +1,117 @@
 # HTML Import, Export and MCP Service Plugin for Figma
 
-A free, open-source **Figma plugin** that **imports HTML pages into Figma as editable layers** and
-**exports Figma frames as clean HTML**, plus an optional **MCP server** that lets Claude
-**create or edit designs directly on the Figma canvas**.
+**A free, open-source Figma plugin for unlimited HTML → Figma imports and unlimited Figma → HTML
+exports.** No account, no API key, no AI, no limits. Everything runs on your own computer, inside
+your own Figma.
+
+[![Download](https://img.shields.io/github/v/release/Javiergptrd/figma-html-import-export-mcp?label=download&color=6366f1)](https://github.com/Javiergptrd/figma-html-import-export-mcp/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-22c55e)](LICENSE)
+![Free forever](https://img.shields.io/badge/price-free%20forever-22c55e)
+![No account needed](https://img.shields.io/badge/account-not%20needed-0ea5e9)
 
 ![The plugin window: Import, Export and Claude tabs](docs/images/plugin-tabs.png)
 
+## Why this plugin
+
+| | |
+| --- | --- |
+| ✅ **Unlimited imports** | Turn as many HTML pages into Figma layers as you want. No monthly cap, no credits. |
+| ✅ **Unlimited exports** | Export any board to a clean HTML file, as often as you want. |
+| ✅ **100% free** | No trial, no paid plan, no "pro" features held back. MIT license, commercial use included. |
+| ✅ **No account, no API key** | Install it and use it. Nothing to sign up for, nothing to paste in. |
+| ✅ **No AI required** | Import and Export are plain, predictable converters. AI is an optional extra, not a requirement. |
+| ✅ **Private by design** | Your designs and HTML files are processed locally in Figma and are never uploaded anywhere. |
+| ✅ **Open source** | Read every line, change it, and build your own version. |
+
+## Everything stays on your computer
+
+- **Import** renders your HTML inside the plugin window in Figma on your machine and converts it to
+  layers right there.
+- **Export** builds the HTML file inside Figma and saves it straight to your computer.
+- The plugin has **no server, no tracking and no analytics**. The only internet access is to load
+  images and fonts that your own HTML page links to, exactly as a browser would.
+
+## What it does
+
+### Import HTML into Figma
+
 ![An HTML page imported into Figma as editable layers](docs/images/import-example.png)
 
-## Install the Figma plugin (no command line)
+- Real, **editable layers**: frames, text, vectors and images, not a flat screenshot
+- Several **screen widths at once** (1920, 1440, 768, 390 or any custom width), each as its own frame
+- Text keeps its styles: bold, italic, links, colors, sizes, line height, letter spacing, truncation
+- Gradients, shadows, blurs, borders, rounded corners, opacity and clipping
+- Inline SVG icons become **editable vectors**; images, `<picture>`, CSS backgrounds and `object-fit` work
+- Form fields, canvas and video frames are included
+- Options: light or dark appearance, import only one element (CSS selector), full page height, and
+  whether to run the page's scripts
 
-Import and Export work on their own. You don't need Node, Claude or a terminal for them.
+### Export a board as HTML
+
+- One **self-contained `.html` file**: images embedded, icons as inline SVG, nothing else to ship
+- **Auto layout becomes flexbox**, or choose fixed positions for a pixel-exact copy
+- **Readable CSS** with class names taken from your layer names
+- Gradients, shadows, blurs, strokes, corner radius and text styles carried over
+- Google Fonts linked automatically for the fonts you used
+- **Download .html** or **Copy code**, with a keyboard shortcut you can change
+
+## Install (no command line)
 
 1. Download **`figma-plugin.zip`** from the
    [latest release](https://github.com/Javiergptrd/figma-html-import-export-mcp/releases/latest)
    and unzip it.
-2. Open **Figma Desktop** (the browser version can't load local plugins) and open any design file.
-3. Go to **Plugins → Development → Import plugin from manifest…** and choose `manifest.json`
-   inside the unzipped `figma-plugin` folder.
-4. Run it from **Plugins → Development → HTML Import, Export and MCP Service Plugin**.
+2. Open **Figma Desktop** and any design file. (The browser version of Figma can't load plugins from
+   a file.)
+3. Go to **Plugins → Development → Import plugin from manifest…** and choose `manifest.json` inside
+   the unzipped `figma-plugin` folder.
 
-Keep the unzipped folder where it is: Figma loads the plugin from it each time.
+That's it. Run it any time from **Plugins → Development → HTML Import, Export and MCP Service Plugin**.
+Keep the unzipped folder where it is, because Figma loads the plugin from it.
 
-## Use it with Claude (optional)
+## How to use it
 
-The **Claude** tab connects the plugin to an MCP server running on your computer, so Claude Code can
-import pages, build layouts and export frames for you.
+**Import:** open the **Import** tab, drop an `.html` file on the window (or click **choose a file**),
+pick one or more widths, and click **Import to Figma**. Each width becomes its own frame next to your
+existing work.
 
-```
-Claude Code ──stdio──▶ MCP server (Node) ──WebSocket :3055──▶ Figma plugin ──▶ Figma canvas
-                         │
-                         └─ headless Chrome renders HTML → layer tree
-```
+> Tip: a single self-contained HTML file works best, for example a page saved with the free
+> [SingleFile](https://github.com/gildas-lormeau/SingleFile) browser extension. Pages saved as
+> "HTML + folder of files" lose their local images and styles.
 
-Figma's REST API cannot create layers, so writing to a file has to go through a plugin running
-inside Figma. The MCP server hosts a local WebSocket (127.0.0.1 only), and the plugin connects to it
-and carries out the server's commands.
+**Export:** select a frame, open the **Export** tab, and click **Download .html** or **Copy code**.
 
-### Setup (one time)
+- Shortcut: **⌃⇧E** on Mac, **Alt+Shift+E** on Windows, while the plugin window is focused. Click
+  the **Shortcut** box to set your own keys; the plugin warns you if Figma already uses them.
+- **Plugins → Development → HTML Import, Export and MCP Service Plugin → Export selection as HTML**
+  downloads the selected board in one step. After that, Figma's **Run last plugin** (**⌥⌘P**,
+  Ctrl+Alt+P on Windows) repeats it from anywhere.
 
-1. **Get the server.** Needs Node 18+, Figma Desktop, and Google Chrome, Chromium, Edge or Brave.
-   Either download **`figma-html-import-export-mcp-full.zip`** from the
-   [latest release](https://github.com/Javiergptrd/figma-html-import-export-mcp/releases/latest)
-   (dependencies included, nothing to install) and unzip it, or clone the repository and install:
-   ```bash
-   git clone https://github.com/Javiergptrd/figma-html-import-export-mcp.git
-   ```
-   ```bash
-   cd figma-html-import-export-mcp && npm install
-   ```
-2. **Register the MCP server** with Claude Code:
-   ```bash
-   claude mcp add figma-html-import-export-mcp -- node "/absolute/path/to/figma-html-import-export-mcp/server/index.js"
-   ```
-   Restart Claude Code (or run `/mcp`) so it starts the server.
-3. **Load the plugin in Figma Desktop.** Open any design file, then go to
-   **Plugins → Development → Import plugin from manifest…** and choose
-   `figma-html-import-export-mcp/figma-plugin/manifest.json`.
+## Bonus: design with Claude (optional)
 
-### Each session
+The plugin's third tab, **Claude**, can connect to a small MCP server on your computer so
+[Claude Code](https://claude.com/claude-code) can import pages, build layouts and export frames for
+you. It is **an extra feature only**: you don't need it, an AI subscription or any account to use
+Import and Export.
 
-In Figma Desktop, open the file you want to work in and run
-**Plugins → Development → HTML Import, Export and MCP Service Plugin → Open plugin window**. Leave its small window open. The window has three tabs: **Import**
-(HTML → Figma), **Export** (board → HTML) and **Claude** (connection status, port and the activity
-log). The dot on the Claude tab turns green once Claude Code is running, and it reconnects
-automatically.
+Setup and the list of Claude tools: **[docs/claude-mcp.md](docs/claude-mcp.md)**.
 
-Then ask Claude, for example:
+## Good to know
 
-- "Import `~/Desktop/landing-page.html` into Figma at 1440 and 390 widths."
-- "Import only the `.modal` element from https://example.com"
-- "Design a login screen in Figma: white card, indigo primary button, auto layout."
-- "Take the selected frame and make a dark-mode version next to it."
-- "Export the frame you just made so you can check it."
-
-## Import from the plugin window
-
-You don't need Claude Code for plain HTML imports. In Figma, run
-**Plugins → Development → HTML Import, Export and MCP Service Plugin**, open the **Import** tab, then:
-
-1. Drop an `.html` file on the window, or click **choose a file**.
-2. Pick one or more widths (1920, 1440, 768, 390, or type others like `1280, 375`).
-3. Optionally open **Options**: viewport height, light/dark appearance, import only one element
-   (CSS selector), full page height, and whether to run the page's scripts.
-4. Click **Import to Figma**. Each width becomes its own frame, placed to the right of your
-   existing content. The log lists fonts that were replaced and anything that couldn't be imported.
-
-Your width and option choices, and the last tab you used, are remembered. Warnings (replaced
-fonts, images that failed) are listed in the Claude tab's activity log. The page renders in a hidden, sandboxed frame inside
-the plugin window and goes through the same converter the MCP server uses, so the layers match a
-Claude import.
-
-What works best is a **single self-contained HTML file**, such as one saved with the
-[SingleFile](https://github.com/gildas-lormeau/SingleFile) browser extension. Differences from a
-Claude import:
-
-- Only one file is read, so pages saved as "HTML + folder of assets" lose their local images and CSS.
-  Use SingleFile, or import through Claude.
-- No URL imports, because most websites don't let other pages download their HTML.
-- Images hosted on other websites are imported only if those servers allow cross-site downloads.
-- `<iframe>`/`<object>`/`<embed>` contents are skipped. Checkboxes, radios, range and color inputs
-  are redrawn instead of screenshotted. Canvas, video frames, icon fonts and SVG fallbacks work as usual.
-
-## Export a board as HTML
-
-Select a frame and, in the plugin window's **Export** tab, click **Download .html** (or
-**Copy code**). You get one self-contained file: CSS classes named after the layers, auto layout as
-flexbox (or **Fixed positions** for an exact copy), icons and vectors as inline SVG, image fills
-embedded, and Google Fonts links for the fonts used.
-
-Shortcuts:
-
-- **⌃⇧E** on a Mac (Alt+Shift+E on Windows) while the plugin window is focused = Download .html.
-  Change it in the Export tab: click the **Shortcut** box and press the new keys (it needs ⌃, ⌥ or ⌘;
-  Esc cancels), **Reset** restores the default and **None** turns it off. The plugin warns you when a
-  combination is one Figma already uses (for example ⇧⌘E is Figma's own Export), and remembers your
-  choice.
-- **Plugins → Development → HTML Import, Export and MCP Service Plugin → Export selection as HTML** opens the plugin and
-  downloads the selected board right away. After that, Figma's **Run last plugin** shortcut
-  (**⌥⌘P**, Ctrl+Alt+P on Windows) repeats it from anywhere in Figma.
-- To give it its own key on a Mac: **System Settings → Keyboard → Keyboard Shortcuts → App
-  Shortcuts → +**, application **Figma**, menu title `Export selection as HTML` (exactly), and pick a
-  key combination that Figma doesn't already use.
-
-Running a menu command restarts the plugin, so the Claude connection drops for a second and
-reconnects by itself.
-
-## Tools
-
-| Tool | What it does |
-| --- | --- |
-| `figma_status` | Is the plugin connected? Which file and page? |
-| `import_html` | Render an HTML file, URL or string and import it as layers. Options: `widths` (e.g. `[1440, 390]`), `height`, `fullPage`, `selector`, `colorScheme`, `javascript`, `dryRun` |
-| `extract_fonts` | Save a page's `@font-face` fonts to a folder so you can install them (see Fonts) |
-| `create_design` | Create layer trees from a JSON spec: frames, auto layout, text, images, SVG, gradients, shadows, components, instances |
-| `update_node` | Change properties of an existing layer (same keys as the spec), or move it to another parent |
-| `get_document_info` / `get_selection` / `get_node` | Read pages, layers, selection and properties |
-| `export_html` | Convert a frame into a self-contained HTML file (`layout`: `auto` flexbox or `absolute`; `savePath`) |
-| `export_image` | Render a node to PNG/JPG (Claude sees the image) or SVG; optional `savePath` |
-| `clone_node`, `delete_nodes`, `select_nodes` | Edit and organize layers |
-| `create_page`, `switch_page` | Manage pages |
-| `create_component` | Turn a frame into a component (reuse it with `INSTANCE` nodes) |
-
-The full JSON node spec is in the `create_design` tool description. In short:
-
-```json
-{ "type": "FRAME", "name": "Card", "width": 360, "fills": ["#FFFFFF"], "cornerRadius": 16,
-  "effects": [{ "type": "DROP_SHADOW", "color": "#00000014", "y": 8, "blur": 24 }],
-  "layout": { "mode": "VERTICAL", "gap": 12, "padding": 24 },
-  "children": [
-    { "type": "TEXT", "text": "Hello, Alex", "fontFamily": "Inter", "fontWeight": 700, "fontSize": 20, "color": "#1A1A1A" },
-    { "type": "FRAME", "name": "Button", "height": 44, "sizing": { "horizontal": "FILL" }, "fills": ["#6366F1"],
-      "cornerRadius": 10, "layout": { "mode": "HORIZONTAL", "justify": "center", "align": "center" },
-      "children": [{ "type": "TEXT", "text": "Continue", "fontWeight": 600, "color": "#FFFFFF" }] }
-  ] }
-```
-
-## What the HTML importer handles
-
-- Layout: element boxes at their exact rendered positions, CSS paint order (z-index), overflow clipping, opacity
-- Backgrounds: colors, linear, radial and conic gradients, `background-image` (cover/contain, positioned icons, tiling)
-- Borders: per-side widths, mixed colors (extra sides become edge layers), dashed/dotted, per-corner radius
-- Effects: box-shadow (multiple, inset, spread), text-shadow, `filter: blur`, `backdrop-filter: blur`
-- Text: one Figma text layer per paragraph with styled ranges (bold, italic, links, colors, sizes),
-  line height, letter spacing, text-transform, alignment, `text-overflow: ellipsis` (truncation), wrapping
-- Inline `<svg>` as editable vectors (`currentColor` and CSS styles resolved), with a raster fallback
-- `<img>`, `<picture>`, CSS images (PNG/JPEG/GIF/WebP/AVIF/SVG, converted when Figma needs it), `object-fit`
-- Forms: input values and placeholders, select values with a dropdown arrow, textareas. Checkboxes,
-  radios, `<canvas>`, `<video>` and `<iframe>` are rasterized
-- Saved pages (e.g. SingleFile) with strict CSP, finished CSS animations, `prefers-color-scheme`
-
-**Limitations:** imports use absolute positioning (flexbox isn't converted to auto layout), CSS
-`::before`/`::after` decorations are skipped (icon fonts are rasterized), and CSS transforms are
-flattened to their bounding boxes. A page captured at a mobile width looks the way the page itself
-renders at that width.
-
-## Fonts
-
-Figma can only use fonts installed on your computer, plus its bundled fonts like Inter. Missing
-fonts fall back to Inter, and `import_html` lists which fonts were substituted. If the page embeds
-its fonts (for example custom web fonts loaded with `@font-face`), ask Claude to run `extract_fonts`,
-install the saved `.otf`/`.ttf` files, restart Figma, and import again.
-
-## Configuration
-
-- `HTML_MCP_PORT`: WebSocket port (default `3055`). If you change it, also update
-  `figma-plugin/manifest.json` (`devAllowedDomains`) and the port field in the plugin window.
-- `CHROME_PATH`: browser executable, if it isn't found automatically.
-
-Running several Claude sessions at once is supported. The first server owns the port and the others
-relay their commands through it.
-
-## Troubleshooting
-
-- **"Figma plugin is not connected"**: run the plugin in Figma and keep its window open. Check that
-  its port matches the server's.
-- **Plugin says "Waiting for MCP server"**: Claude Code isn't running the server. Check `/mcp` in
-  Claude Code.
-- **Text looks different**: check the import summary for substituted fonts (see Fonts).
-- **Page renders wrong**: try `javascript: false` for saved static pages, raise `waitMs` for slow
-  apps, or use `dryRun: true` to see Chrome's screenshot.
-
-## Calling tools from a terminal
-
-`scripts/call.js` runs any tool without an MCP client. This is useful in a Claude session that
-started before the server was registered.
-
-```bash
-node scripts/call.js figma_status
-node scripts/call.js import_html '{"source":"/abs/path/page.html"}' --wait 600 --file "My File"
-node scripts/call.js export_image '{"id":"5:2"}' --out ./exports
-```
-
-`--wait` waits for the plugin to connect, `--file` only proceeds in a matching Figma file, and
-`--plugin-version` waits for a specific plugin build. Figma Desktop hot-reloads development plugins
-when `figma-plugin/code.js` changes.
-
-## Development and tests
-
-`figma-plugin/ui.html` contains a copy of `server/walker.js` and `server/inpage.js` (Figma loads the
-plugin window as one file). After editing either of them, run `npm run build`. `npm test` fails if
-the copy is out of date.
-
-No Figma is needed for tests. They run the real plugin code against a strict mock of the Figma
-Plugin API that rejects invalid paints/effects, unloaded fonts, bad auto-layout sizing, and more.
-
-```bash
-npm test                                   # build check + both end-to-end tests below
-node test/e2e-mcp.js                       # full chain: MCP client → server → WebSocket → plugin (mock)
-node test/e2e-plugin.js [page.html]        # plugin window imports a file by itself, compared with the server
-node test/run-import.js page.html out/     # import + render the Figma result back to a PNG for comparison
-node test/screenshot.js page.html out.png  # browser screenshot of the original
-npm run test:design                        # create_design sample (auto layout)
-npm run release                            # build the release zips in dist/
-```
-
-Files: `server/index.js` (MCP tools), `server/walker.js` (DOM → layer tree, runs in Chrome),
-`server/inpage.js` (image fetching, settling and canvas rasters, run in the page),
-`server/capture.js` (browser, images, fonts), `server/bridge.js` (WebSocket host/peer),
-`figma-plugin/code.js` (builds layers in Figma), `figma-plugin/ui.html` (plugin window: imports and
-the Claude connection), `scripts/build-plugin.js` (copies the in-page code into `ui.html`).
+- Imports use fixed positions (flexbox in the HTML isn't turned into auto layout yet), CSS
+  `::before`/`::after` decorations are skipped, and CSS transforms are flattened.
+- Figma can only use fonts installed on your computer. Missing fonts fall back to Inter and the
+  plugin tells you which ones were replaced.
+- Importing straight from a website URL needs the optional Claude setup, because most sites don't
+  allow other pages to download their HTML.
 
 ## Contributing
 
-Issues and pull requests are welcome. Before opening a pull request, run `npm test` (and
-`npm run build` if you changed `server/walker.js` or `server/inpage.js`). Please keep test pages and
-samples free of real personal data or third-party branding.
+Ideas, bug reports and pull requests are welcome. See **[docs/development.md](docs/development.md)**
+for how to build and test.
 
 ## License
 
-[MIT](LICENSE). Free to use, modify and redistribute, including commercially.
+[MIT](LICENSE): free to use, modify and share, including for commercial work.
 
-This is an independent community project. It is not affiliated with or endorsed by Figma or
-Anthropic. "Figma" and "Claude" are trademarks of their respective owners.
+This is an independent community project, not affiliated with or endorsed by Figma or Anthropic.
+"Figma" and "Claude" are trademarks of their respective owners.

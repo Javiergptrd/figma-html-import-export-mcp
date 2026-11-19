@@ -21,6 +21,7 @@
     "server/",
     "figma-plugin/",
     "scripts/",
+    "docs/",
     "README.md",
     "LICENSE"
   ],

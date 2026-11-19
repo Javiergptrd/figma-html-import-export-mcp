@@ -47,7 +47,7 @@ zip(pluginDir, 'figma-plugin.zip');
 
 // 2. Full bundle with production dependencies
 const fullDir = path.join(stage, 'figma-html-import-export-mcp');
-for (const f of ['figma-plugin', 'server', 'scripts', 'README.md', 'LICENSE', 'package.json', 'package-lock.json']) copy(f, path.join(fullDir, f));
+for (const f of ['figma-plugin', 'server', 'scripts', 'README.md', 'LICENSE', 'docs', 'package.json', 'package-lock.json']) copy(f, path.join(fullDir, f));
 fs.rmSync(path.join(fullDir, 'scripts/package-release.js'));
 execFileSync('npm', ['ci', '--omit=dev', '--no-audit', '--no-fund', '--silent'], { cwd: fullDir, stdio: 'inherit' });
 zip(fullDir, 'figma-html-import-export-mcp-full.zip');
