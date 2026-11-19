@@ -1,0 +1,44 @@
+{
+  "name": "html-import-export-mcp",
+  "version": "1.0.0",
+  "description": "MCP server and Figma plugin that import HTML into Figma, export Figma frames to HTML, and let Claude design directly on the Figma canvas.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "figma",
+    "figma-plugin",
+    "html-to-figma",
+    "figma-to-html",
+    "claude"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "server/index.js",
+  "bin": {
+    "html-import-export-mcp": "server/index.js"
+  },
+  "files": [
+    "server/",
+    "figma-plugin/",
+    "scripts/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node server/index.js",
+    "build": "node scripts/build-plugin.js",
+    "test": "node scripts/build-plugin.js --check && node test/e2e-mcp.js && node test/e2e-plugin.js",
+    "test:plugin": "node test/e2e-plugin.js",
+    "test:import": "node test/run-import.js",
+    "test:design": "node test/run-import.js --design test/design-sample.json"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "puppeteer-core": "^25.14.0",
+    "ws": "^8.22.0",
+    "zod": "^4.6.7"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

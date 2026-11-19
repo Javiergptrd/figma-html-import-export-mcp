@@ -1,0 +1,1991 @@
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font: 11px/1.45 Inter, system-ui, sans-serif; margin: 0; padding: 0; background: var(--figma-color-bg, #fff); color: var(--figma-color-text, #222); }
+  h2 { font-size: 11px; font-weight: 600; margin: 0 0 8px; }
+  .muted { color: var(--figma-color-text-secondary, #777); }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .spacer { flex: 1; }
+  input, select { padding: 4px 6px; border: 1px solid var(--figma-color-border, #ccc); border-radius: 4px; background: transparent; color: inherit; font: inherit; min-width: 0; }
+  input[type=checkbox] { margin: 0; }
+  button { padding: 4px 10px; border: 1px solid var(--figma-color-border, #ccc); border-radius: 5px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+  button:disabled { cursor: default; opacity: .5; }
+  .link { border: 0; padding: 0; color: var(--figma-color-text-brand, #0d99ff); }
+
+  .tabs { display: flex; gap: 2px; padding: 0 8px; border-bottom: 1px solid var(--figma-color-border, #e5e5e5); }
+  .tab { display: flex; align-items: center; gap: 6px; padding: 9px 8px 8px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; color: var(--figma-color-text-secondary, #777); font-weight: 500; }
+  .tab:hover { color: var(--figma-color-text, #222); }
+  .tab[aria-selected=true] { color: var(--figma-color-text, #222); font-weight: 600; border-bottom-color: var(--figma-color-text, #222); }
+  .panel { padding: 12px; }
+  .panel[hidden] { display: none; }
+  .hint { margin-top: 4px; }
+
+  #drop { border: 1px dashed var(--figma-color-border-strong, #b3b3b3); border-radius: 6px; padding: 14px 10px; text-align: center; }
+  #drop.over { border-color: var(--figma-color-border-brand-strong, #0d99ff); background: var(--figma-color-bg-brand-tertiary, #e5f4ff); }
+  #picked { font-weight: 600; word-break: break-word; }
+
+  .field { margin-top: 12px; }
+  .field > label { display: block; margin-bottom: 4px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip { padding: 3px 8px; border-radius: 999px; }
+  .chip[aria-pressed=true] { background: var(--figma-color-bg-brand, #0d99ff); border-color: transparent; color: var(--figma-color-text-onbrand, #fff); }
+  #custom-widths { flex: 1; min-width: 72px; }
+
+  details { margin-top: 10px; }
+  summary { cursor: pointer; user-select: none; }
+  .opts { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; margin-top: 8px; }
+  .opts input[type=text], .opts input[type=number], .opts select { width: 100%; }
+
+  #import { width: 100%; margin-top: 12px; padding: 7px 10px; border: 0; background: var(--figma-color-bg-brand, #0d99ff); color: var(--figma-color-text-onbrand, #fff); font-weight: 600; }
+  #progress { margin-top: 6px; min-height: 16px; }
+  #progress.ok { color: var(--figma-color-text-success, #14ae5c); }
+  #progress.error { color: var(--figma-color-text-danger, #f24822); }
+
+  #sel-name { font-weight: 600; word-break: break-word; }
+  #sel-name.none { font-weight: 400; color: var(--figma-color-text-secondary, #777); }
+  .export .opts { margin-top: 12px; }
+  .export .buttons { display: flex; gap: 6px; margin-top: 12px; }
+  #export-html { flex: 1; padding: 7px 10px; border: 0; background: var(--figma-color-bg-brand, #0d99ff); color: var(--figma-color-text-onbrand, #fff); font-weight: 600; }
+  #export-html kbd { font: inherit; font-weight: 400; opacity: .75; margin-left: 6px; }
+  .shortcut { min-width: 92px; font-weight: 600; letter-spacing: .5px; }
+  .shortcut.recording { border-color: var(--figma-color-border-brand-strong, #0d99ff); color: var(--figma-color-text-brand, #0d99ff); font-weight: 400; letter-spacing: 0; }
+  #shortcut-hint.warn { color: var(--figma-color-text-warning, #b86200); }
+  #export-progress { margin-top: 6px; min-height: 16px; }
+  #export-progress.ok { color: var(--figma-color-text-success, #14ae5c); }
+  #export-progress.error { color: var(--figma-color-text-danger, #f24822); }
+  .card { padding: 10px; border: 1px solid var(--figma-color-border, #e5e5e5); border-radius: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--figma-color-icon-tertiary, #b3b3b3); flex: none; }
+  .dot.on { background: #14ae5c; }
+  #port { width: 46px; text-align: center; }
+  #log { margin-top: 4px; height: 170px; padding: 6px 8px; border-radius: 6px; background: var(--figma-color-bg-secondary, #f5f5f5); overflow: auto; font: 10px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--figma-color-text-secondary, #666); white-space: pre-wrap; }
+  .stage { position: fixed; left: 0; top: 0; border: 0; opacity: 0; pointer-events: none; z-index: -1; }
+</style>
+
+<div id="app">
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="import" aria-selected="true">Import</button>
+    <button class="tab" role="tab" data-tab="export" aria-selected="false">Export</button>
+    <button class="tab" role="tab" data-tab="claude" aria-selected="false"><span id="tab-dot" class="dot"></span>Claude</button>
+  </div>
+
+  <div class="panel" id="panel-import" role="tabpanel">
+  <h2>Import HTML into Figma</h2>
+  <div id="drop">
+    <div id="picked" hidden></div>
+    <div id="drop-hint">Drop an .html file here</div>
+    <div class="muted">or <button id="pick" class="link">choose a file</button></div>
+    <input id="file-input" type="file" accept=".html,.htm,text/html" hidden />
+  </div>
+
+  <div class="field">
+    <label>Widths</label>
+    <div class="chips">
+      <button class="chip" data-width="1920" aria-pressed="false">1920</button>
+      <button class="chip" data-width="1440" aria-pressed="true">1440</button>
+      <button class="chip" data-width="768" aria-pressed="false">768</button>
+      <button class="chip" data-width="390" aria-pressed="false">390</button>
+      <input id="custom-widths" type="text" placeholder="Other, e.g. 1280" />
+    </div>
+  </div>
+
+  <details id="options">
+    <summary>Options</summary>
+    <div class="opts">
+      <label for="opt-height">Viewport height</label><input id="opt-height" type="number" min="200" max="4000" value="900" />
+      <label for="opt-scheme">Appearance</label>
+      <select id="opt-scheme"><option value="light">Light</option><option value="dark">Dark</option></select>
+      <label for="opt-selector">Only element</label><input id="opt-selector" type="text" placeholder="CSS selector, e.g. .modal" />
+      <span></span><label class="row"><input id="opt-fullpage" type="checkbox" checked /> Full page height</label>
+      <span></span><label class="row"><input id="opt-js" type="checkbox" checked /> Run page scripts</label>
+    </div>
+  </details>
+
+  <button id="import" disabled>Import to Figma</button>
+  <div id="progress" class="muted"></div>
+  </div>
+
+  <div class="panel export" id="panel-export" role="tabpanel" hidden>
+    <h2>Export a board as HTML</h2>
+    <div class="card">
+      <div class="muted">Selected board</div>
+      <div id="sel-name" class="none">Select a board (frame) to export</div>
+    </div>
+    <div class="opts">
+      <label for="exp-layout">Layout</label>
+      <select id="exp-layout">
+        <option value="auto">Flexbox for auto layout</option>
+        <option value="absolute">Fixed positions (exact)</option>
+      </select>
+      <span></span><label class="row"><input id="exp-fonts" type="checkbox" checked /> Link Google Fonts</label>
+      <label for="shortcut-rec">Shortcut</label>
+      <div class="row">
+        <button id="shortcut-rec" class="shortcut" title="Click, then press the new key combination"></button>
+        <button id="shortcut-reset" class="link">Reset</button>
+        <button id="shortcut-clear" class="link">None</button>
+      </div>
+      <span></span><div id="shortcut-hint" class="muted"></div>
+    </div>
+    <div class="buttons">
+      <button id="export-html" disabled>Download .html</button>
+      <button id="copy-html" disabled title="Copy the HTML code to the clipboard">Copy code</button>
+    </div>
+    <div id="export-progress" class="muted"></div>
+  </div>
+
+  <div class="panel claude" id="panel-claude" role="tabpanel" hidden>
+    <h2>Claude connection</h2>
+    <div class="card">
+      <div class="row">
+        <span id="dot" class="dot"></span><span id="status">Connecting…</span>
+        <span class="spacer"></span>
+        <input id="port" type="text" inputmode="numeric" value="3055" title="MCP server port" />
+        <button id="reconnect">Reconnect</button>
+      </div>
+      <div id="file" class="muted hint"></div>
+    </div>
+    <div class="field">
+      <label>Activity</label>
+      <div id="log"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// <generated> by scripts/build-plugin.js from server/walker.js and server/inpage.js. Do not edit here; run `npm run build`.
+function walkPage(opts) {
+  const options = Object.assign(
+    { selector: null, maxNodes: 20000, rasterizeNativeControls: true, fullPage: true, collectRasterElements: false },
+    opts || {}
+  );
+
+  const SKIP_TAGS = new Set([
+    'SCRIPT', 'STYLE', 'LINK', 'META', 'HEAD', 'TITLE', 'NOSCRIPT',
+    'TEMPLATE', 'BASE', 'SOURCE', 'TRACK', 'PARAM', 'MAP', 'AREA', 'DATALIST',
+  ]);
+  const ICON_FONT_RE = /icon|awesome|material|glyph|symbols|fontello|ionicons|feather|remixicon/i;
+
+  const scrollX = window.scrollX;
+  const scrollY = window.scrollY;
+  const rasters = []; // { id, x, y, width, height } screenshot later
+  const rasterElements = {}; // raster id -> element, when options.collectRasterElements
+  const images = new Map(); // url -> id
+  const stats = { elements: 0, frames: 0, texts: 0, svgs: 0, images: 0, rasters: 0, truncated: false };
+  let nodeCount = 0;
+
+  // ---------- colors ----------
+  const colorCache = new Map();
+  const cnv = document.createElement('canvas');
+  cnv.width = cnv.height = 1;
+  const cctx = cnv.getContext('2d', { willReadFrequently: true });
+  const hex2 = (n) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0');
+
+  // Returns "#rrggbb" / "#rrggbbaa", or null when fully transparent.
+  function normColor(str) {
+    if (!str || str === 'transparent' || str === 'none') return null;
+    if (colorCache.has(str)) return colorCache.get(str);
+    let r, g, b, a = 1;
+    const m = str.match(/^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\s*\)$/);
+    if (m) {
+      r = +m[1]; g = +m[2]; b = +m[3];
+      if (m[4] != null) a = m[4].endsWith('%') ? parseFloat(m[4]) / 100 : +m[4];
+    } else {
+      // Any other CSS color syntax (oklch, color(), hsl, named...): rasterize it.
+      cctx.clearRect(0, 0, 1, 1);
+      cctx.fillStyle = '#000';
+      cctx.fillStyle = str;
+      cctx.fillRect(0, 0, 1, 1);
+      const d = cctx.getImageData(0, 0, 1, 1).data;
+      r = d[0]; g = d[1]; b = d[2]; a = d[3] / 255;
+    }
+    let out = null;
+    if (a > 0.003) {
+      out = '#' + hex2(r) + hex2(g) + hex2(b) + (a < 0.998 ? hex2(a * 255) : '');
+    }
+    colorCache.set(str, out);
+    return out;
+  }
+
+  // ---------- small parsers ----------
+  const px = (v) => parseFloat(v) || 0;
+
+  // Split on a top-level separator (ignoring ones nested in parentheses or quotes).
+  function splitTop(str, sep) {
+    const out = [];
+    let depth = 0, cur = '', quote = null, esc = false;
+    for (const ch of str) {
+      if (quote) {
+        cur += ch;
+        if (esc) esc = false;
+        else if (ch === '\\') esc = true;
+        else if (ch === quote) quote = null;
+        continue;
+      }
+      if (ch === '"' || ch === "'") quote = ch;
+      if (ch === '(') depth++;
+      if (ch === ')') depth--;
+      if (ch === sep && depth === 0) { out.push(cur.trim()); cur = ''; continue; }
+      cur += ch;
+    }
+    if (cur.trim()) out.push(cur.trim());
+    return out;
+  }
+
+  // Split a space-separated token list, keeping function calls together.
+  function splitSpaces(str) { return splitTop(str.replace(/\s+/g, ' '), ' '); }
+
+  function isColorToken(t) {
+    return /^(rgb|rgba|hsl|hsla|hwb|lab|lch|oklab|oklch|color)\(/i.test(t) || /^#/.test(t) ||
+      /^(transparent|currentcolor|[a-z]+)$/i.test(t) && !/^(inset|to|left|right|top|bottom|center|circle|ellipse|closest|farthest)/i.test(t);
+  }
+
+  function parseShadows(value, isText) {
+    if (!value || value === 'none') return [];
+    const effects = [];
+    for (const part of splitTop(value, ',')) {
+      const toks = splitSpaces(part);
+      let inset = false, color = null;
+      const lens = [];
+      for (const t of toks) {
+        if (t === 'inset') inset = true;
+        else if (/^-?[\d.]+(px)?$/.test(t)) lens.push(px(t));
+        else color = t;
+      }
+      const c = normColor(color || 'rgb(0,0,0)');
+      if (!c) continue;
+      const [x = 0, y = 0, blur = 0, spread = 0] = lens;
+      if (!x && !y && !blur && !spread) continue;
+      effects.push({
+        type: inset ? 'INNER_SHADOW' : 'DROP_SHADOW',
+        color: c, x, y, blur, spread: isText ? 0 : spread,
+      });
+    }
+    // CSS paints the first shadow on top; Figma paints the last effect on top.
+    return effects.reverse();
+  }
+
+  function angleFromDirection(dir) {
+    dir = dir.trim();
+    let m;
+    if ((m = dir.match(/^(-?[\d.]+)(deg|turn|rad|grad)$/))) {
+      const v = +m[1];
+      return m[2] === 'deg' ? v : m[2] === 'turn' ? v * 360 : m[2] === 'rad' ? v * 180 / Math.PI : v * 0.9;
+    }
+    if (dir.startsWith('to ')) {
+      const s = dir.slice(3).split(/\s+/).sort().join(' ');
+      const map = {
+        top: 0, right: 90, bottom: 180, left: 270,
+        'right top': 45, 'bottom right': 135, 'bottom left': 225, 'left top': 315,
+      };
+      if (s in map) return map[s];
+    }
+    return null;
+  }
+
+  function parseStops(parts, lineLength) {
+    const stops = [];
+    for (const p of parts) {
+      const toks = splitSpaces(p);
+      const color = normColor(toks[0]);
+      const positions = toks.slice(1).map((t) =>
+        t.endsWith('%') ? parseFloat(t) / 100 : lineLength ? px(t) / lineLength : null
+      );
+      if (!positions.length) positions.push(null);
+      for (const pos of positions) stops.push({ color: color || '#00000000', position: pos });
+    }
+    if (!stops.length) return stops;
+    // Fill in missing positions (CSS: evenly distributed between known ones).
+    if (stops[0].position == null) stops[0].position = 0;
+    if (stops[stops.length - 1].position == null) stops[stops.length - 1].position = 1;
+    for (let i = 1; i < stops.length; i++) {
+      if (stops[i].position != null) continue;
+      let j = i;
+      while (stops[j].position == null) j++;
+      const a = stops[i - 1].position, b = stops[j].position;
+      for (let k = i; k < j; k++) stops[k].position = a + ((b - a) * (k - i + 1)) / (j - i + 1);
+    }
+    for (let i = 1; i < stops.length; i++) {
+      stops[i].position = Math.max(stops[i].position, stops[i - 1].position);
+    }
+    stops.forEach((s) => (s.position = Math.max(0, Math.min(1, s.position))));
+    return stops;
+  }
+
+  function parseGradient(str, w, h) {
+    const m = str.match(/^(repeating-)?(linear|radial|conic)-gradient\((.*)\)$/s);
+    if (!m) return null;
+    const args = splitTop(m[3], ',');
+    if (m[2] === 'linear') {
+      let angle = 180;
+      const a = angleFromDirection(args[0]);
+      if (a != null) { angle = a; args.shift(); }
+      else if (/^to /.test(args[0])) {
+        // Corner directions depend on the box aspect ratio.
+        const d = args.shift().slice(3);
+        const deg = Math.atan2(w, h) * 180 / Math.PI;
+        angle = /top/.test(d) ? (/right/.test(d) ? deg : 360 - deg) : (/right/.test(d) ? 180 - deg : 180 + deg);
+      }
+      const rad = angle * Math.PI / 180;
+      const len = Math.abs(w * Math.sin(rad)) + Math.abs(h * Math.cos(rad));
+      return { type: 'GRADIENT_LINEAR', angle, stops: parseStops(args, len) };
+    }
+    if (m[2] === 'radial') {
+      if (!isColorToken(splitSpaces(args[0])[0])) args.shift();
+      // CSS default extent is farthest-corner: sqrt(2) x the inscribed ellipse.
+      return { type: 'GRADIENT_RADIAL', radius: Math.SQRT2, stops: parseStops(args, Math.max(w, h) / 2) };
+    }
+    // conic -> angular
+    if (!isColorToken(splitSpaces(args[0])[0])) args.shift();
+    return { type: 'GRADIENT_ANGULAR', stops: parseStops(args.map((s) => s.replace(/-?[\d.]+deg/g, (d) => (parseFloat(d) / 3.6) + '%')), 0) };
+  }
+
+  function imageRef(url) {
+    if (!url) return null;
+    if (!images.has(url)) images.set(url, 'img' + images.size);
+    return images.get(url);
+  }
+
+  function cssUrl(layer) {
+    const m = layer.match(/^url\((.*)\)$/s);
+    if (!m) return null;
+    let u = m[1].trim();
+    if ((u[0] === '"' || u[0] === "'") && u[u.length - 1] === u[0]) u = u.slice(1, -1).replace(/\\(["'\\])/g, '$1');
+    return u;
+  }
+
+  // Resolve one axis of background-position for an image of length `img`
+  // inside a box of length `box`.
+  function bgPos(val, box, img) {
+    val = (val || '0%').trim();
+    let m;
+    if ((m = val.match(/^calc\(\s*([\d.]+)%\s*([+-])\s*([\d.]+)px\s*\)$/))) {
+      return (box - img) * (+m[1] / 100) + (m[2] === '-' ? -1 : 1) * +m[3];
+    }
+    const toks = val.split(/\s+/);
+    let from = 'start', off = null;
+    for (const t of toks) {
+      if (t === 'left' || t === 'top') from = 'start';
+      else if (t === 'right' || t === 'bottom') from = 'end';
+      else if (t === 'center') { from = 'start'; off = (box - img) / 2; }
+      else if (t.endsWith('%')) off = (box - img) * (parseFloat(t) / 100);
+      else off = px(t);
+    }
+    if (off == null) off = 0;
+    return from === 'end' ? box - img - off : off;
+  }
+
+  function bgSize(val, box, natural) {
+    // returns [w, h] for explicit/auto sizes, or null for cover/contain
+    if (/cover|contain/.test(val)) return null;
+    const [nw, nh] = natural || [box.w, box.h];
+    const toks = (val || 'auto').split(/\s+/);
+    const conv = (t, len) => (t === 'auto' ? null : t.endsWith('%') ? (parseFloat(t) / 100) * len : px(t));
+    let w = conv(toks[0], box.w);
+    let h = conv(toks[1] || 'auto', box.h);
+    if (w == null && h == null) { w = nw; h = nh; }
+    else if (w == null) w = nh ? (h * nw) / nh : h;
+    else if (h == null) h = nw ? (w * nh) / nw : w;
+    return [w, h];
+  }
+
+  // Returns { fills, layers }: simple backgrounds become fills; positioned,
+  // non-repeating images (icons, chevrons) become separate image layers.
+  function parseBackground(cs, w, h) {
+    const fills = [];
+    const layers = [];
+    const bg = normColor(cs.backgroundColor);
+    if (bg) fills.push({ type: 'SOLID', color: bg });
+    const bi = cs.backgroundImage;
+    if (bi && bi !== 'none') {
+      const imgs = splitTop(bi, ',');
+      const sizes = splitTop(cs.backgroundSize || '', ',');
+      const repeats = splitTop(cs.backgroundRepeat || '', ',');
+      const posX = splitTop(cs.backgroundPositionX || '', ',');
+      const posY = splitTop(cs.backgroundPositionY || '', ',');
+      const bl = px(cs.borderLeftWidth), bt = px(cs.borderTopWidth);
+      const box = { w: w - bl - px(cs.borderRightWidth), h: h - bt - px(cs.borderBottomWidth) };
+      // CSS: first layer on top. Figma: last fill on top.
+      for (let i = imgs.length - 1; i >= 0; i--) {
+        const layer = imgs[i];
+        const url = cssUrl(layer);
+        if (url) {
+          const ref = imageRef(url);
+          const size = sizes[i] || sizes[0] || 'auto';
+          const rep = repeats[i] || repeats[0] || 'repeat';
+          const natural = (window.__bgSizes || {})[url];
+          const dims = bgSize(size, box, natural);
+          if (!dims) {
+            fills.push({ type: 'IMAGE', imageRef: ref, scaleMode: size === 'contain' ? 'FIT' : 'FILL' });
+          } else if (/no-repeat/.test(rep) || (dims[0] >= box.w - 1 && dims[1] >= box.h - 1)) {
+            const x = bgPos(posX[i] || posX[0], box.w, dims[0]);
+            const y = bgPos(posY[i] || posY[0], box.h, dims[1]);
+            // SVG backgrounds scale with preserveAspectRatio "meet" (= FIT).
+            const isSvg = /^data:image\/svg|\.svg(\?|#|$)/i.test(url);
+            if (dims[0] > 0.5 && dims[1] > 0.5) layers.push({ x: bl + x, y: bt + y, width: dims[0], height: dims[1], imageRef: ref, scaleMode: isSvg ? 'FIT' : 'FILL' });
+          } else {
+            fills.push({ type: 'IMAGE', imageRef: ref, scaleMode: 'TILE' });
+          }
+          continue;
+        }
+        const g = parseGradient(layer, w, h);
+        if (g && g.stops.length) fills.push(g);
+      }
+    }
+    return { fills, layers };
+  }
+
+  function parseRadius(v, w, h) {
+    if (!v) return 0;
+    const first = v.split(' ')[0];
+    if (first.endsWith('%')) return (parseFloat(first) / 100) * Math.min(w, h);
+    return px(first);
+  }
+
+  // Figma allows one stroke paint per layer. The heaviest border side defines
+  // it; sides with a different color/style are returned as `extra` and drawn
+  // as separate edge layers.
+  function borderInfo(cs) {
+    const sides = ['Top', 'Right', 'Bottom', 'Left'];
+    const found = [];
+    for (const s of sides) {
+      const st = cs['border' + s + 'Style'];
+      const wdt = st === 'none' || st === 'hidden' ? 0 : px(cs['border' + s + 'Width']);
+      const c = wdt ? normColor(cs['border' + s + 'Color']) : null;
+      if (c && wdt) found.push({ side: s.toLowerCase(), color: c, style: st, weight: wdt });
+    }
+    if (!found.length) return null;
+    const primary = found.reduce((a, b) => (b.weight > a.weight ? b : a));
+    const same = (f) => f.color === primary.color && (f.style === primary.style || (f.style !== 'dashed' && f.style !== 'dotted' && primary.style !== 'dashed' && primary.style !== 'dotted'));
+    const weights = { top: 0, right: 0, bottom: 0, left: 0 };
+    const extra = [];
+    for (const f of found) {
+      if (same(f)) weights[f.side] = f.weight;
+      else extra.push(f);
+    }
+    return { color: primary.color, style: primary.style, weights, extra };
+  }
+
+  function borderEdgeLayers(extra, rect) {
+    return extra.map((f) => {
+      const w = rect.width, h = rect.height, t = f.weight;
+      const dashed = f.style === 'dashed' || f.style === 'dotted';
+      const horizontal = f.side === 'top' || f.side === 'bottom';
+      const ox = f.side === 'right' ? w - t : 0;
+      const oy = f.side === 'bottom' ? h - t : 0;
+      const abs = { x: rect.left + scrollX + ox, y: rect.top + scrollY + oy };
+      if (dashed && horizontal) {
+        return {
+          type: 'LINE', name: `border-${f.side}`,
+          _abs: { x: abs.x, y: abs.y + t / 2 }, width: w, height: 0,
+          strokes: [{ type: 'SOLID', color: f.color }], strokeWeight: t,
+          dashPattern: f.style === 'dotted' ? [t, t] : [Math.max(2, t) * 2, Math.max(2, t)],
+        };
+      }
+      return {
+        type: 'RECTANGLE', name: `border-${f.side}`, _abs: abs,
+        width: horizontal ? w : t, height: horizontal ? t : h,
+        fills: [{ type: 'SOLID', color: f.color }],
+      };
+    });
+  }
+
+  // ---------- SVG serialization ----------
+  const SVG_PROPS = [
+    'fill', 'fill-opacity', 'fill-rule', 'stroke', 'stroke-width', 'stroke-opacity',
+    'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'stroke-dashoffset',
+    'stroke-miterlimit', 'clip-rule', 'opacity', 'stop-color', 'stop-opacity',
+    'font-family', 'font-size', 'font-weight', 'text-anchor', 'dominant-baseline',
+  ];
+  const SVG_DEFAULTS = {
+    'fill-opacity': '1', 'stroke-opacity': '1', opacity: '1', 'stroke-dasharray': 'none',
+    'stroke-dashoffset': '0px', 'stroke-miterlimit': '4', 'fill-rule': 'nonzero', 'clip-rule': 'nonzero',
+    'stroke-linecap': 'butt', 'stroke-linejoin': 'miter', 'text-anchor': 'start', 'dominant-baseline': 'auto',
+  };
+
+  function serializeSvg(svg, rect) {
+    const clone = svg.cloneNode(true);
+    const origs = [svg, ...svg.querySelectorAll('*')];
+    const clones = [clone, ...clone.querySelectorAll('*')];
+    for (let i = origs.length - 1; i >= 0; i--) {
+      const o = origs[i], c = clones[i];
+      const cs = getComputedStyle(o);
+      if (cs.display === 'none' && !/^(defs|symbol|clipPath|mask|linearGradient|radialGradient|stop|pattern|marker)$/i.test(o.tagName)) {
+        c.remove();
+        continue;
+      }
+      if (/^(style|script|title|desc|metadata)$/i.test(o.tagName)) { c.remove(); continue; }
+      for (const p of SVG_PROPS) {
+        let v = cs.getPropertyValue(p);
+        if (!v || SVG_DEFAULTS[p] === v) continue;
+        if (/^(fill|stroke|stop-color)$/.test(p) && /^(rgb|#)/.test(v)) {
+          const nc = normColor(v);
+          if (!nc) v = 'none';
+          else if (nc.length === 9) {
+            // Split alpha into the *-opacity attribute (Figma ignores 8-digit hex in SVG).
+            v = nc.slice(0, 7);
+            const opAttr = p === 'stop-color' ? 'stop-opacity' : p + '-opacity';
+            c.setAttribute(opAttr, String(parseInt(nc.slice(7), 16) / 255 * parseFloat(cs.getPropertyValue(opAttr) || '1')));
+          } else v = nc;
+        }
+        c.setAttribute(p, v);
+      }
+      c.removeAttribute('class');
+      c.removeAttribute('style');
+    }
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    if (!clone.getAttribute('viewBox')) {
+      const vb = svg.viewBox && svg.viewBox.baseVal;
+      if (vb && vb.width) clone.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
+      else clone.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+    }
+    clone.setAttribute('width', String(rect.width));
+    clone.setAttribute('height', String(rect.height));
+    return new XMLSerializer().serializeToString(clone);
+  }
+
+  // ---------- text ----------
+  function fontInfo(cs) {
+    const families = cs.fontFamily.split(',').map((f) => f.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
+    const size = px(cs.fontSize);
+    const lh = cs.lineHeight === 'normal' ? 'auto' : px(cs.lineHeight);
+    const ls = cs.letterSpacing === 'normal' ? 0 : px(cs.letterSpacing);
+    const tt = cs.textTransform;
+    const deco = cs.textDecorationLine || '';
+    let align = cs.textAlign;
+    const rtl = cs.direction === 'rtl';
+    if (align === 'start') align = rtl ? 'right' : 'left';
+    if (align === 'end') align = rtl ? 'left' : 'right';
+    if (align === '-webkit-center') align = 'center';
+    return {
+      fontFamily: families[0] || 'Inter',
+      fontFallbacks: families.slice(1),
+      fontWeight: parseInt(cs.fontWeight, 10) || 400,
+      italic: cs.fontStyle === 'italic' || cs.fontStyle.startsWith('oblique'),
+      fontSize: size,
+      lineHeight: lh,
+      letterSpacing: ls,
+      textCase: tt === 'uppercase' ? 'UPPER' : tt === 'lowercase' ? 'LOWER' : tt === 'capitalize' ? 'TITLE' : undefined,
+      textDecoration: deco.includes('underline') ? 'UNDERLINE' : deco.includes('line-through') ? 'STRIKETHROUGH' : undefined,
+      textAlign: align === 'center' ? 'CENTER' : align === 'right' ? 'RIGHT' : align === 'justify' ? 'JUSTIFIED' : 'LEFT',
+    };
+  }
+
+  function lineCount(rects) {
+    const tops = [];
+    for (const r of rects) {
+      if (r.width < 0.5 || r.height < 0.5) continue;
+      if (!tops.some((t) => Math.abs(t - r.top) < r.height * 0.5)) tops.push(r.top);
+    }
+    return tops.length;
+  }
+
+  function makeText(chars, cs, box, lines, color) {
+    const fi = fontInfo(cs);
+    // `line-height: normal` depends on font metrics; pin it to what the browser
+    // rendered so a substituted font in Figma keeps the same vertical rhythm.
+    if (fi.lineHeight === 'auto') fi.lineHeight = Math.round((box.height / Math.max(1, lines)) * 100) / 100;
+    const lh = fi.lineHeight;
+    // Browser text rects cover the font content area; Figma text boxes cover
+    // the full line box. Expand by the half-leading so baselines line up.
+    let y = box.top, height = box.height;
+    if (lh && lines > 0) {
+      const contentH = box.height / lines;
+      const halfLeading = (lh - contentH) / 2;
+      y -= halfLeading;
+      height = lh * lines;
+    }
+    const node = Object.assign({
+      type: 'TEXT',
+      text: chars,
+      _abs: { x: box.left + scrollX, y: y + scrollY },
+      width: box.width,
+      height,
+      color,
+    }, fi);
+    if (lines <= 1) {
+      node.autoResize = 'WIDTH_AND_HEIGHT';
+      node.textAnchor = fi.textAlign === 'CENTER' ? 'CENTER' : fi.textAlign === 'RIGHT' ? 'RIGHT' : 'LEFT';
+      node.textAlign = 'LEFT';
+    } else {
+      node.autoResize = 'HEIGHT';
+      node.width = box.width + 1;
+    }
+    if (cs.textShadow && cs.textShadow !== 'none') node.effects = parseShadows(cs.textShadow, true);
+    stats.texts++;
+    nodeCount++;
+    return node;
+  }
+
+  function collapseWs(text, ws) {
+    if (/^(pre|pre-wrap|break-spaces)$/.test(ws)) return text;
+    if (ws === 'pre-line') return text.replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').trim();
+    return text.replace(/\s+/g, ' ').trim();
+  }
+
+  function textColor(cs) {
+    return normColor(cs.webkitTextFillColor && cs.webkitTextFillColor !== cs.color ? cs.webkitTextFillColor : cs.color);
+  }
+
+  // A text node that starts mid-line (after an inline sibling) and wraps can't
+  // be one Figma text box; emit one single-line text layer per rendered line.
+  function splitByLines(tn, cs, color) {
+    const text = tn.nodeValue;
+    const r = document.createRange();
+    const out = [];
+    let start = 0, top = null;
+    const flush = (end) => {
+      if (end <= start) return;
+      r.setStart(tn, start); r.setEnd(tn, end);
+      const b = r.getBoundingClientRect();
+      const chars = collapseWs(text.slice(start, end), cs.whiteSpace);
+      if (chars && b.width > 0.5) out.push(makeText(chars, cs, b, 1, color));
+    };
+    for (let i = 0; i < text.length; i++) {
+      r.setStart(tn, i); r.setEnd(tn, i + 1);
+      const rr = r.getClientRects()[0];
+      if (!rr || rr.height < 0.5) continue;
+      if (top == null) top = rr.top;
+      else if (rr.top > top + rr.height * 0.5) { flush(i); start = i; top = rr.top; }
+    }
+    flush(text.length);
+    return out;
+  }
+
+  function textNodeToSpecs(tn, cs) {
+    const raw = tn.nodeValue;
+    if (!raw || !raw.trim()) return [];
+    const range = document.createRange();
+    range.selectNodeContents(tn);
+    const rects = Array.from(range.getClientRects()).filter((r) => r.width >= 0.5 && r.height >= 0.5);
+    const box = range.getBoundingClientRect();
+    if (box.width < 0.5 || box.height < 0.5 || !rects.length) return [];
+    const color = textColor(cs);
+    if (!color) return [];
+    const chars = collapseWs(raw, cs.whiteSpace);
+    if (!chars) return [];
+    const lines = lineCount(rects);
+    if (lines > 1 && rects[0].left > box.left + 1) return splitByLines(tn, cs, color);
+    return [makeText(chars, cs, box, lines, color)];
+  }
+
+  // ---------- merged inline text (one Figma text layer with styled ranges) ----------
+  const INLINE_BLOCKERS = /^(IMG|INPUT|BUTTON|SELECT|TEXTAREA|CANVAS|VIDEO|IFRAME|OBJECT|EMBED|PICTURE|SVG|MATH)$/i;
+
+  function isSimpleInline(el) {
+    if (SKIP_TAGS.has(el.tagName) || el.tagName === 'BR') return true;
+    if (INLINE_BLOCKERS.test(el.tagName)) return false;
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none') return true;
+    if (cs.display !== 'inline') return false;
+    if (cs.visibility !== 'visible' || parseFloat(cs.opacity) < 1) return false;
+    if (cs.position === 'absolute' || cs.position === 'fixed') return false;
+    if (cs.position === 'relative' && (px(cs.top) || px(cs.left) || px(cs.bottom) || px(cs.right))) return false;
+    if (normColor(cs.backgroundColor) || cs.backgroundImage !== 'none' || cs.boxShadow !== 'none' || borderInfo(cs)) return false;
+    if (Math.abs(px(cs.paddingLeft)) + Math.abs(px(cs.paddingRight)) + Math.abs(px(cs.marginLeft)) + Math.abs(px(cs.marginRight)) > 2) return false;
+    if (cs.verticalAlign !== 'baseline') return false;
+    if (needsRaster(el, cs)) return false;
+    for (const c of el.childNodes) if (c.nodeType === 1 && !isSimpleInline(c)) return false;
+    return true;
+  }
+
+  function canMergeInline(el, cs) {
+    if (/^(flex|inline-flex|grid|inline-grid|contents|table|inline-table|table-row|table-row-group|table-header-group|table-footer-group|ruby)$/.test(cs.display)) return false;
+    if (el.tagName !== 'BUTTON' && INLINE_BLOCKERS.test(el.tagName)) return false;
+    let hasText = false;
+    for (const c of el.childNodes) {
+      if (c.nodeType === 3) { if (c.nodeValue.trim()) hasText = true; }
+      else if (c.nodeType === 1) {
+        if (!isSimpleInline(c)) return false;
+        if (!hasText && c.textContent.trim()) hasText = true;
+      }
+    }
+    return hasText;
+  }
+
+  function mergedText(el, cs, rect) {
+    const raw = [];
+    (function collect(node) {
+      for (const c of node.childNodes) {
+        if (c.nodeType === 3) raw.push({ text: c.nodeValue, cs: c.parentElement === el ? cs : getComputedStyle(c.parentElement) });
+        else if (c.nodeType === 1) {
+          if (c.tagName === 'BR') { raw.push({ br: true }); continue; }
+          if (SKIP_TAGS.has(c.tagName) || getComputedStyle(c).display === 'none') continue;
+          collect(c);
+        }
+      }
+    })(el);
+
+    let chars = '';
+    const segs = [];
+    for (const r of raw) {
+      if (r.br) { chars = chars.replace(/ +$/, '') + '\n'; continue; }
+      const ws = r.cs.whiteSpace;
+      const pre = /^(pre|pre-wrap|break-spaces)$/.test(ws);
+      let t = r.text;
+      if (ws === 'pre-line') t = t.replace(/[ \t]+/g, ' ');
+      else if (!pre) t = t.replace(/\s+/g, ' ');
+      if (!pre && (chars === '' || /[ \n]$/.test(chars))) t = t.replace(/^ /, '');
+      if (!t) continue;
+      segs.push({ start: chars.length, end: chars.length + t.length, cs: r.cs });
+      chars += t;
+    }
+    chars = chars.replace(/^\s+/, (m) => { segs.forEach((s) => { s.start = Math.max(0, s.start - m.length); s.end = Math.max(0, s.end - m.length); }); return ''; });
+    chars = chars.replace(/\s+$/, '');
+    if (!chars) return null;
+
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const rects = Array.from(range.getClientRects()).filter((r) => r.width >= 0.5 && r.height >= 0.5);
+    if (!rects.length) return null;
+    const box = {
+      left: Math.min(...rects.map((r) => r.left)),
+      top: Math.min(...rects.map((r) => r.top)),
+      right: Math.max(...rects.map((r) => r.right)),
+      bottom: Math.max(...rects.map((r) => r.bottom)),
+    };
+    box.width = box.right - box.left;
+    box.height = box.bottom - box.top;
+    const lines = lineCount(rects);
+    const color = textColor(cs) || '#00000000';
+    const node = makeText(chars, cs, box, lines, color);
+
+    const cl = rect.left + px(cs.borderLeftWidth) + px(cs.paddingLeft);
+    const cw = rect.width - px(cs.borderLeftWidth) - px(cs.paddingLeft) - px(cs.borderRightWidth) - px(cs.paddingRight);
+    if (lines > 1) {
+      // Wrap at the element's content width, like the browser did.
+      if (cw >= box.width - 1) { node._abs.x = cl + scrollX; node.width = cw + 1; }
+    } else if (cs.textOverflow === 'ellipsis' && cs.overflowX !== 'visible' && box.width > cw + 0.5 && cw > 1) {
+      // text-overflow: ellipsis -> fixed-width Figma text with truncation.
+      node._abs.x = cl + scrollX;
+      node.width = cw;
+      node.autoResize = 'NONE';
+      node.truncate = true;
+      delete node.textAnchor;
+    }
+
+    const base = fontInfo(cs);
+    const out = [];
+    for (const s of segs) {
+      if (s.cs === cs) continue;
+      const end = Math.min(s.end, chars.length);
+      if (end <= s.start) continue;
+      const fi = fontInfo(s.cs);
+      const c = textColor(s.cs) || '#00000000';
+      const d = {};
+      if (fi.fontFamily !== base.fontFamily) { d.fontFamily = fi.fontFamily; d.fontFallbacks = fi.fontFallbacks; }
+      if (fi.fontWeight !== base.fontWeight) d.fontWeight = fi.fontWeight;
+      if (fi.italic !== base.italic) d.italic = fi.italic;
+      if (fi.fontSize !== base.fontSize) d.fontSize = fi.fontSize;
+      if (c !== color) d.color = c;
+      if (fi.textDecoration !== base.textDecoration) d.textDecoration = fi.textDecoration || 'NONE';
+      if (fi.textCase !== base.textCase) d.textCase = fi.textCase || 'ORIGINAL';
+      if (fi.letterSpacing !== base.letterSpacing) d.letterSpacing = fi.letterSpacing;
+      if (Object.keys(d).length) out.push(Object.assign({ start: s.start, end }, d));
+    }
+    if (out.length) node.segments = out;
+    return node;
+  }
+
+  function formControlText(el, cs, rect) {
+    const tag = el.tagName;
+    let value = '', placeholder = false;
+    if (tag === 'SELECT') {
+      const opt = el.options[el.selectedIndex];
+      value = opt ? opt.text : '';
+    } else {
+      if (/^(checkbox|radio|range|color|file|hidden|image|submit|button|reset)$/i.test(el.type || '')) {
+        if (/^(submit|button|reset)$/i.test(el.type)) value = el.value;
+        else return null;
+      } else {
+        value = el.type === 'password' ? '•'.repeat((el.value || '').length) : el.value;
+        if (!value && el.placeholder) { value = el.placeholder; placeholder = true; }
+      }
+    }
+    if (!value) return null;
+    const pcs = placeholder ? getComputedStyle(el, '::placeholder') : cs;
+    const color = normColor(pcs.color) || normColor(cs.color);
+    if (!color) return null;
+    const pl = px(cs.paddingLeft) + px(cs.borderLeftWidth);
+    const pr = px(cs.paddingRight) + px(cs.borderRightWidth);
+    const pt = px(cs.paddingTop) + px(cs.borderTopWidth);
+    const pb = px(cs.paddingBottom) + px(cs.borderBottomWidth);
+    const fi = fontInfo(pcs);
+    const node = Object.assign({
+      type: 'TEXT',
+      text: tag === 'TEXTAREA' ? value : value.replace(/\s+/g, ' '),
+      _abs: { x: rect.left + scrollX + pl, y: rect.top + scrollY + pt },
+      width: Math.max(1, rect.width - pl - pr),
+      height: Math.max(1, rect.height - pt - pb),
+      color,
+      autoResize: 'NONE',
+      verticalAlign: tag === 'TEXTAREA' ? 'TOP' : 'CENTER',
+    }, fi);
+    if (tag === 'SELECT' && /^(auto|menulist)/.test(cs.appearance)) node.width = Math.max(1, node.width - 16);
+    stats.texts++;
+    nodeCount++;
+    return node;
+  }
+
+  // ---------- layer naming ----------
+  function layerName(el) {
+    const tag = el.tagName.toLowerCase();
+    const aria = el.getAttribute('aria-label');
+    if (aria) return `${tag} "${aria.slice(0, 40)}"`;
+    if (el.id && !/^[:_]|\d{3,}/.test(el.id)) return `${tag}#${el.id}`;
+    const cls = typeof el.className === 'string'
+      ? el.className.split(/\s+/).find((c) => c && !/^(sc-|css-|jsx-|_)|[A-Z0-9]{5,}|^[a-z]{1,3}\d/.test(c))
+      : null;
+    return cls ? `${tag}.${cls}` : tag;
+  }
+
+  // ---------- stacking ----------
+  function stackKey(cs) {
+    const positioned = cs.position !== 'static';
+    const z = positioned && cs.zIndex !== 'auto' ? parseInt(cs.zIndex, 10) || 0 : 0;
+    return z * 2 + (positioned ? 1 : 0);
+  }
+  function createsContext(cs) {
+    return (cs.position !== 'static' && cs.zIndex !== 'auto') || parseFloat(cs.opacity) < 1 ||
+      cs.transform !== 'none' || cs.filter !== 'none' || cs.isolation === 'isolate';
+  }
+
+  // ---------- element visitor ----------
+  function needsRaster(el, cs) {
+    if (el.tagName === 'CANVAS' || el.tagName === 'VIDEO' || el.tagName === 'IFRAME' || el.tagName === 'OBJECT' || el.tagName === 'EMBED') return true;
+    if (options.rasterizeNativeControls && el.tagName === 'INPUT' && /^(checkbox|radio|range|color)$/i.test(el.type) && cs.appearance !== 'none') return true;
+    if (el.children.length === 0) {
+      if (ICON_FONT_RE.test(cs.fontFamily) && el.textContent.trim()) return true;
+      for (const pseudo of ['::before', '::after']) {
+        const pcs = getComputedStyle(el, pseudo);
+        if (pcs.content && pcs.content !== 'none' && pcs.content !== 'normal' && pcs.content !== '""' && ICON_FONT_RE.test(pcs.fontFamily)) return true;
+      }
+    }
+    return false;
+  }
+
+  function addRaster(node, rect, el) {
+    const id = 'r' + rasters.length;
+    rasters.push({ id, x: rect.left + scrollX, y: rect.top + scrollY, width: rect.width, height: rect.height });
+    if (options.collectRasterElements) rasterElements[id] = el;
+    node.fills = (node.fills || []).concat([{ type: 'IMAGE', imageRef: id, scaleMode: 'FILL' }]);
+    stats.rasters++;
+  }
+
+  function visit(el, isRoot) {
+    if (nodeCount >= options.maxNodes) { stats.truncated = true; return null; }
+    if (SKIP_TAGS.has(el.tagName)) return null;
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none') return null;
+    const opacity = parseFloat(cs.opacity);
+    if (opacity === 0) return null;
+    stats.elements++;
+
+    if (cs.display === 'contents') {
+      // No box of its own: hoist children.
+      return { _hoist: visitChildren(el, cs) };
+    }
+
+    const rect = el.getBoundingClientRect();
+    const w = rect.width, h = rect.height;
+    const visible = cs.visibility === 'visible';
+    const tag = el.tagName;
+
+    const node = {
+      type: 'FRAME',
+      name: layerName(el),
+      _abs: { x: rect.left + scrollX, y: rect.top + scrollY },
+      width: w,
+      height: h,
+      _stack: stackKey(cs),
+      _ctx: createsContext(cs),
+    };
+    if (opacity < 1) node.opacity = opacity;
+
+    // SVG: serialize and stop.
+    if (tag.toLowerCase() === 'svg') {
+      if (!visible || w < 0.5 || h < 0.5) return null;
+      node.type = 'SVG';
+      node.svg = serializeSvg(el, rect);
+      // Fallback raster in case Figma's SVG parser rejects it.
+      node._rasterFallback = 'r' + rasters.length;
+      rasters.push({ id: node._rasterFallback, x: rect.left + scrollX, y: rect.top + scrollY, width: w, height: h, svg: true });
+      stats.svgs++;
+      nodeCount++;
+      return node;
+    }
+
+    let hasVisual = false;
+    let bgLayers = [];
+    if (visible) {
+      const bg = parseBackground(cs, w, h);
+      if (bg.fills.length) { node.fills = bg.fills; hasVisual = true; }
+      bgLayers = bg.layers.map((l) => ({
+        type: 'RECTANGLE',
+        name: 'background-image',
+        _abs: { x: rect.left + scrollX + l.x, y: rect.top + scrollY + l.y },
+        width: l.width,
+        height: l.height,
+        fills: [{ type: 'IMAGE', imageRef: l.imageRef, scaleMode: l.scaleMode }],
+      }));
+      if (bgLayers.length) { hasVisual = true; nodeCount += bgLayers.length; }
+      const border = borderInfo(cs);
+      if (border && border.extra.length) {
+        bgLayers = bgLayers.concat(borderEdgeLayers(border.extra, rect));
+        nodeCount += border.extra.length;
+      }
+      if (border) {
+        node.strokes = [{ type: 'SOLID', color: border.color }];
+        const ws = border.weights;
+        if (ws.top === ws.right && ws.top === ws.bottom && ws.top === ws.left) node.strokeWeight = ws.top;
+        else node.strokeWeights = ws;
+        node.strokeAlign = 'INSIDE';
+        if (border.style === 'dashed') node.dashPattern = [Math.max(2, ws.top || ws.left) * 2, Math.max(2, ws.top || ws.left)];
+        if (border.style === 'dotted') node.dashPattern = [Math.max(1, ws.top || ws.left), Math.max(1, ws.top || ws.left)];
+        hasVisual = true;
+      }
+      const effects = parseShadows(cs.boxShadow, false);
+      const blur = cs.filter && cs.filter.match(/blur\(([\d.]+)px\)/);
+      if (blur) effects.push({ type: 'LAYER_BLUR', radius: +blur[1] });
+      const bblur = (cs.backdropFilter || cs.webkitBackdropFilter || '').match(/blur\(([\d.]+)px\)/);
+      if (bblur) effects.push({ type: 'BACKGROUND_BLUR', radius: +bblur[1] });
+      if (effects.length) { node.effects = effects; hasVisual = true; }
+    }
+
+    const radii = [
+      parseRadius(cs.borderTopLeftRadius, w, h), parseRadius(cs.borderTopRightRadius, w, h),
+      parseRadius(cs.borderBottomRightRadius, w, h), parseRadius(cs.borderBottomLeftRadius, w, h),
+    ];
+    if (radii.some((r) => r > 0)) node.cornerRadius = radii.every((r) => r === radii[0]) ? radii[0] : radii;
+
+    const clips = !/^(visible)$/.test(cs.overflowX) || !/^(visible)$/.test(cs.overflowY) ||
+      (tag === 'IMG' || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT');
+    node.clipsContent = !!clips && !isRoot ? true : false;
+
+    if (visible && tag === 'IMG') {
+      const src = el.currentSrc || el.src;
+      if (src && el.complete && el.naturalWidth > 0) {
+        node.fills = (node.fills || []).concat([{
+          type: 'IMAGE', imageRef: imageRef(src),
+          scaleMode: cs.objectFit === 'contain' || cs.objectFit === 'scale-down' ? 'FIT' : 'FILL',
+        }]);
+        node.name = el.alt ? `img "${el.alt.slice(0, 40)}"` : 'img';
+        hasVisual = true;
+        stats.images++;
+      }
+    } else if (visible && needsRaster(el, cs)) {
+      addRaster(node, rect, el);
+      node.name += ' (raster)';
+      nodeCount++;
+      return node;
+    }
+
+    let children = [];
+    if (visible && /^(INPUT|TEXTAREA|SELECT)$/.test(tag)) {
+      const t = formControlText(el, cs, rect);
+      if (t) children.push(t);
+      if (tag === 'SELECT' && cs.appearance !== 'none' && cs.backgroundImage === 'none') {
+        // Native dropdown arrow isn't in the DOM: draw an equivalent chevron.
+        const col = (textColor(cs) || '#000000').slice(0, 7);
+        const ax = rect.right - px(cs.borderRightWidth) - 18;
+        const ay = rect.top + rect.height / 2 - 3;
+        children.push({
+          type: 'SVG', name: 'select-arrow',
+          _abs: { x: ax + scrollX, y: ay + scrollY }, width: 10, height: 6,
+          svg: `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" fill="none" stroke="${col}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+        });
+        nodeCount++;
+      }
+    } else if (tag !== 'IMG') {
+      const merged = visible && canMergeInline(el, cs) ? mergedText(el, cs, rect) : null;
+      children = merged ? [merged] : visitChildren(el, cs);
+    }
+    if (bgLayers.length) children = bgLayers.concat(children);
+
+    if (!hasVisual && !children.length && !isRoot) return null;
+    if (w < 0.5 && h < 0.5 && !children.length) return null;
+
+    // Sort by CSS paint order (stable).
+    children = children
+      .map((c, i) => ({ c, i }))
+      .sort((a, b) => (a.c._stack || 0) - (b.c._stack || 0) || a.i - b.i)
+      .map((x) => x.c);
+    // Non-stacking-context wrappers inherit the elevation of their content
+    // so overlays (dropdowns, sticky headers) stay on top of later siblings.
+    if (!node._ctx && node._stack <= 1) {
+      const maxChild = Math.max(0, ...children.map((c) => c._stack || 0));
+      if (maxChild > 1) node._stack = maxChild;
+    }
+    if (children.length) node.children = children;
+    if (node.fills || node.strokes || node.effects) stats.frames++;
+    nodeCount++;
+    return node;
+  }
+
+  function visitChildren(el, cs) {
+    const out = [];
+    const visible = cs.visibility === 'visible';
+    for (const child of el.childNodes) {
+      if (child.nodeType === 3) {
+        if (!visible) continue;
+        out.push(...textNodeToSpecs(child, cs));
+      } else if (child.nodeType === 1) {
+        const r = visit(child, false);
+        if (!r) continue;
+        if (r._hoist) out.push(...r._hoist);
+        else out.push(r);
+      }
+      if (stats.truncated) break;
+    }
+    return out;
+  }
+
+  // ---------- root ----------
+  const docEl = document.documentElement;
+  const body = document.body;
+  let rootEl = body;
+  if (options.selector) {
+    rootEl = document.querySelector(options.selector);
+    if (!rootEl) throw new Error(`Selector not found: ${options.selector}`);
+  }
+
+  let root;
+  if (rootEl === body) {
+    const htmlCs = getComputedStyle(docEl);
+    const bodyCs = getComputedStyle(body);
+    const canvasBg = normColor(htmlCs.backgroundColor) || normColor(bodyCs.backgroundColor) || '#ffffff';
+    const width = Math.max(docEl.clientWidth, window.innerWidth);
+    const height = options.fullPage
+      ? Math.max(docEl.scrollHeight, body.scrollHeight, window.innerHeight)
+      : window.innerHeight;
+    const bodyNode = visit(body, false);
+    let kids = bodyNode ? [bodyNode] : [];
+    // Body background is propagated to the canvas; avoid painting it twice.
+    if (bodyNode && !normColor(htmlCs.backgroundColor) && bodyNode.fills) {
+      bodyNode.fills = bodyNode.fills.filter((f) => f.type !== 'SOLID' || f.color !== canvasBg);
+      if (!bodyNode.fills.length) delete bodyNode.fills;
+    }
+    root = {
+      type: 'FRAME',
+      name: document.title || 'Imported page',
+      _abs: { x: 0, y: 0 },
+      width,
+      height,
+      fills: [{ type: 'SOLID', color: canvasBg }],
+      clipsContent: true,
+      children: kids,
+    };
+  } else {
+    root = visit(rootEl, true);
+    root.clipsContent = true;
+  }
+
+  // Convert absolute coordinates to parent-relative and strip internals.
+  function finalize(node, parentAbs) {
+    node.x = Math.round((node._abs.x - parentAbs.x) * 100) / 100;
+    node.y = Math.round((node._abs.y - parentAbs.y) * 100) / 100;
+    node.width = Math.round(node.width * 100) / 100;
+    node.height = Math.round(node.height * 100) / 100;
+    const abs = node._abs;
+    delete node._abs; delete node._stack; delete node._ctx;
+    if (node.children) node.children.forEach((c) => finalize(c, abs));
+  }
+  const rootAbs = root._abs;
+  finalize(root, rootAbs);
+  root.x = 0; root.y = 0;
+
+  return {
+    tree: root,
+    rasters: rasters.map((r) => Object.assign({}, r, { x: r.x, y: r.y })),
+    images: Array.from(images.entries()).map(([url, id]) => ({ id, url })),
+    rasterElements: options.collectRasterElements ? rasterElements : undefined,
+    rootOffset: rootAbs,
+    stats,
+  };
+}
+
+async function settleInPage() {
+  if (document.fonts) await document.fonts.ready;
+  // Natural sizes of CSS background images (needed for background-size: auto).
+  window.__bgSizes = {};
+  const urls = new Set();
+  for (const el of document.querySelectorAll('*')) {
+    const bi = getComputedStyle(el).backgroundImage;
+    if (!bi || !bi.includes('url(')) continue;
+    for (const m of bi.matchAll(/url\("((?:[^"\\]|\\.)*)"\)/g)) urls.add(m[1].replace(/\\(["'\\])/g, '$1'));
+  }
+  await Promise.all([...urls].map((u) => new Promise((res) => {
+    const im = new Image();
+    im.onload = () => { window.__bgSizes[u] = [im.naturalWidth, im.naturalHeight]; res(); };
+    im.onerror = () => res();
+    setTimeout(res, 4000);
+    im.src = u;
+  })));
+  // Jump finite animations to their end state, freeze infinite ones.
+  for (const a of document.getAnimations ? document.getAnimations() : []) {
+    try { a.finish(); } catch { a.pause(); a.currentTime = 0; }
+  }
+}
+
+function fetchImagesInPage(list) {
+  const toB64 = (blob) =>
+    new Promise((res, rej) => {
+      const fr = new FileReader();
+      fr.onload = () => res(String(fr.result).split(',')[1]);
+      fr.onerror = rej;
+      fr.readAsDataURL(blob);
+    });
+  const loadImg = (src) =>
+    new Promise((res, rej) => {
+      const im = new Image();
+      im.onload = () => res(im);
+      im.onerror = () => rej(new Error('decode failed'));
+      im.src = src;
+    });
+  // data: URLs are decoded here rather than fetched: the Figma plugin window's
+  // content security policy may not allow fetch() of data: URLs.
+  const load = async (url) => {
+    const m = /^data:([^,]*?)(;base64)?,/i.exec(url);
+    if (!m) {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      return resp.blob();
+    }
+    const body = url.slice(m[0].length);
+    let bytes;
+    if (m[2]) {
+      const bin = atob(body.replace(/\s+/g, ''));
+      bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    } else {
+      let text;
+      try { text = decodeURIComponent(body); } catch { text = unescape(body); }
+      bytes = new TextEncoder().encode(text);
+    }
+    return new Blob([bytes], { type: (m[1] || 'text/plain').split(';')[0] });
+  };
+  // Figma rejects images larger than 4096px on either side.
+  const MAX = 4096;
+  const fit = (w, h) => {
+    const k = Math.min(1, MAX / Math.max(w, h));
+    return [Math.max(1, Math.round(w * k)), Math.max(1, Math.round(h * k))];
+  };
+  return Promise.all(
+    list.map(async ({ id, url }) => {
+      try {
+        const blob = await load(url);
+        const type = (blob.type || '').toLowerCase();
+        let bmp = null;
+        if (!type.includes('svg')) {
+          try { bmp = await createImageBitmap(blob); } catch { /* fall back to <img> decoding */ }
+        }
+        const tooBig = bmp && (bmp.width > MAX || bmp.height > MAX);
+        if (/^image\/(png|jpeg|jpg|gif)$/.test(type) && !tooBig) {
+          return { id, mime: type, data: await toB64(blob) };
+        }
+        if (bmp) {
+          const [w, h] = fit(bmp.width, bmp.height);
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(bmp, 0, 0, w, h);
+          const jpeg = /jpe?g/.test(type);
+          return { id, mime: jpeg ? 'image/jpeg' : 'image/png', data: c.toDataURL(jpeg ? 'image/jpeg' : 'image/png', 0.92).split(',')[1] };
+        }
+        // SVG, ICO and anything createImageBitmap can't decode: rasterize via <img>.
+        const objUrl = URL.createObjectURL(blob);
+        try {
+          const im = await loadImg(objUrl);
+          let w = im.naturalWidth || 256, h = im.naturalHeight || 256;
+          const isSvg = type.includes('svg');
+          const k = isSvg ? Math.min(4, Math.max(2, 1024 / Math.max(w, h))) : 1;
+          [w, h] = fit(w * k, h * k);
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(im, 0, 0, w, h);
+          return { id, mime: 'image/png', data: c.toDataURL('image/png').split(',')[1] };
+        } finally {
+          URL.revokeObjectURL(objUrl);
+        }
+      } catch (e) {
+        return { id, error: String(e && e.message || e) };
+      }
+    })
+  );
+}
+
+async function rasterizeInPage(rasters, elements, svgs) {
+  const SCALE = 2;
+  const MAX = 4096;
+  const px = (v) => parseFloat(v) || 0;
+  const loadImg = (src) =>
+    new Promise((res, rej) => {
+      const im = new Image();
+      im.onload = () => res(im);
+      im.onerror = () => rej(new Error('SVG could not be decoded'));
+      im.src = src;
+    });
+  const accentOf = (cs) => (cs.accentColor && cs.accentColor !== 'auto' ? cs.accentColor : '#0075ff');
+  const roundRect = (g, x, y, w, h, r) => {
+    g.beginPath();
+    g.moveTo(x + r, y);
+    g.arcTo(x + w, y, x + w, y + h, r);
+    g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r);
+    g.arcTo(x, y, x + w, y, r);
+    g.closePath();
+  };
+  const cssString = (content) => {
+    const m = /^"((?:[^"\\]|\\.)*)"$/.exec(content || '');
+    return m ? m[1].replace(/\\(.)/g, '$1') : '';
+  };
+  const glyph = (g, cs, text, w, h) => {
+    if (!text) return false;
+    g.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    g.fillStyle = cs.color;
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText(text, w / 2, h / 2);
+    return true;
+  };
+
+  function drawElement(g, el, w, h) {
+    const cs = getComputedStyle(el);
+    const tag = el.tagName;
+    if (tag === 'CANVAS' || tag === 'VIDEO') {
+      const l = px(cs.borderLeftWidth) + px(cs.paddingLeft), t = px(cs.borderTopWidth) + px(cs.paddingTop);
+      const r = px(cs.borderRightWidth) + px(cs.paddingRight), b = px(cs.borderBottomWidth) + px(cs.paddingBottom);
+      g.drawImage(el, l, t, Math.max(1, w - l - r), Math.max(1, h - t - b));
+      return;
+    }
+    if (tag === 'INPUT') {
+      const type = el.type.toLowerCase();
+      const accent = accentOf(cs);
+      if (el.disabled) g.globalAlpha = 0.5;
+      if (type === 'checkbox' || type === 'radio') {
+        const s = Math.min(w, h), x = (w - s) / 2, y = (h - s) / 2;
+        if (type === 'checkbox') {
+          roundRect(g, x + 0.5, y + 0.5, s - 1, s - 1, Math.max(1, s * 0.15));
+          g.fillStyle = el.checked || el.indeterminate ? accent : '#ffffff';
+          g.fill();
+          if (!el.checked && !el.indeterminate) { g.strokeStyle = '#767676'; g.lineWidth = 1; g.stroke(); }
+          g.strokeStyle = '#ffffff';
+          g.lineWidth = Math.max(1.5, s * 0.14);
+          g.lineCap = 'round';
+          g.lineJoin = 'round';
+          g.beginPath();
+          if (el.indeterminate) {
+            g.moveTo(x + s * 0.28, y + s / 2); g.lineTo(x + s * 0.72, y + s / 2);
+          } else if (el.checked) {
+            g.moveTo(x + s * 0.25, y + s * 0.52); g.lineTo(x + s * 0.43, y + s * 0.7); g.lineTo(x + s * 0.76, y + s * 0.32);
+          }
+          g.stroke();
+        } else {
+          g.beginPath();
+          g.arc(w / 2, h / 2, s / 2 - 0.75, 0, Math.PI * 2);
+          g.fillStyle = '#ffffff';
+          g.fill();
+          g.strokeStyle = el.checked ? accent : '#767676';
+          g.lineWidth = el.checked ? Math.max(1.5, s * 0.12) : 1;
+          g.stroke();
+          if (el.checked) {
+            g.beginPath();
+            g.arc(w / 2, h / 2, s * 0.25, 0, Math.PI * 2);
+            g.fillStyle = accent;
+            g.fill();
+          }
+        }
+        return;
+      }
+      if (type === 'range') {
+        const min = +el.min || 0, max = el.max === '' ? 100 : +el.max;
+        const k = max > min ? Math.min(1, Math.max(0, (+el.value - min) / (max - min))) : 0;
+        const th = Math.min(16, h), tr = Math.min(8, h / 4);
+        const cx = th / 2 + (w - th) * k;
+        roundRect(g, 0, h / 2 - tr / 2, w, tr, tr / 2);
+        g.fillStyle = '#efefef';
+        g.fill();
+        roundRect(g, 0, h / 2 - tr / 2, cx, tr, tr / 2);
+        g.fillStyle = accent;
+        g.fill();
+        g.beginPath();
+        g.arc(cx, h / 2, th / 2, 0, Math.PI * 2);
+        g.fill();
+        return;
+      }
+      if (type === 'color') {
+        roundRect(g, 0.5, 0.5, w - 1, h - 1, 2);
+        g.fillStyle = '#efefef';
+        g.fill();
+        g.strokeStyle = '#767676';
+        g.lineWidth = 1;
+        g.stroke();
+        g.fillStyle = el.value || '#000000';
+        g.fillRect(5, 5, Math.max(1, w - 10), Math.max(1, h - 10));
+        return;
+      }
+    }
+    if (tag === 'IFRAME' || tag === 'OBJECT' || tag === 'EMBED') {
+      throw new Error(`<${tag.toLowerCase()}> content can't be captured inside Figma`);
+    }
+    // Icon fonts: draw the ::before/::after glyphs, else the element's own
+    // text (ligature icons like Material Icons).
+    let drawn = false;
+    for (const pseudo of ['::before', '::after']) {
+      const pcs = getComputedStyle(el, pseudo);
+      if (glyph(g, pcs, cssString(pcs.content), w, h)) drawn = true;
+    }
+    if (!drawn) drawn = el.children.length === 0 && glyph(g, cs, el.textContent.trim(), w, h);
+    if (!drawn) throw new Error(`nothing to draw for <${tag.toLowerCase()}>`);
+  }
+
+  const out = [];
+  for (const r of rasters) {
+    const k = Math.min(SCALE, MAX / Math.max(r.width, r.height, 1));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(r.width * k));
+    c.height = Math.max(1, Math.round(r.height * k));
+    const g = c.getContext('2d');
+    g.scale(c.width / r.width, c.height / r.height);
+    try {
+      if (r.svg) {
+        if (!svgs[r.id]) throw new Error('no SVG markup');
+        const im = await loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgs[r.id]));
+        g.drawImage(im, 0, 0, r.width, r.height);
+      } else {
+        if (!elements[r.id]) throw new Error('element not found');
+        drawElement(g, elements[r.id], r.width, r.height);
+      }
+      out.push({ id: r.id, mime: 'image/png', data: c.toDataURL('image/png').split(',')[1] });
+    } catch (e) {
+      out.push({ id: r.id, error: String(e && e.message || e) });
+    }
+  }
+  return out;
+}
+// </generated>
+</script>
+
+<script>
+  var ws = null;
+  var retryTimer = null;
+  var portInput = document.getElementById('port');
+  var statusEl = document.getElementById('status');
+  var dotEl = document.getElementById('dot');
+  var logEl = document.getElementById('log');
+  var progressEl = document.getElementById('progress');
+  var importBtn = document.getElementById('import');
+
+  function setStatus(text, state) {
+    statusEl.textContent = text;
+    dotEl.className = 'dot' + (state ? ' ' + state : '');
+    var tabDot = document.getElementById('tab-dot');
+    tabDot.className = dotEl.className;
+    tabDot.title = 'Claude: ' + text;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Tabs: Import / Export / Claude. The last one used is remembered.
+  // ---------------------------------------------------------------------------
+
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var activeTab = 'import';
+
+  function showTab(name, save) {
+    if (!document.getElementById('panel-' + name)) return;
+    activeTab = name;
+    tabs.forEach(function (t) {
+      var on = t.dataset.tab === name;
+      t.setAttribute('aria-selected', String(on));
+      document.getElementById('panel-' + t.dataset.tab).hidden = !on;
+    });
+    if (name === 'claude') logEl.scrollTop = logEl.scrollHeight;
+    if (save) saveSettings();
+  }
+  tabs.forEach(function (t) { t.onclick = function () { showTab(t.dataset.tab, true); }; });
+
+  function log(text) {
+    var line = new Date().toLocaleTimeString() + '  ' + text + '\n';
+    logEl.textContent = (logEl.textContent + line).split('\n').slice(-80).join('\n');
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function notesHint(n) {
+    return n ? ' ' + n + (n > 1 ? ' notes' : ' note') + ' in the Claude tab.' : '';
+  }
+
+  function setProgress(text, state) {
+    progressEl.textContent = text;
+    progressEl.className = state || 'muted';
+  }
+
+  function toPlugin(msg) {
+    parent.postMessage({ pluginMessage: msg }, '*');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Claude MCP server connection (optional: imports below work without it)
+  // ---------------------------------------------------------------------------
+
+  function connect() {
+    clearTimeout(retryTimer);
+    if (ws) { ws.onclose = null; try { ws.close(); } catch (e) {} }
+    var port = parseInt(portInput.value, 10) || 3055;
+    try {
+      ws = new WebSocket('ws://localhost:' + port);
+    } catch (e) {
+      setStatus('Cannot connect (' + e.message + ')');
+      retryTimer = setTimeout(connect, 3000);
+      return;
+    }
+    ws.onopen = function () {
+      setStatus('Connected', 'on');
+      log('Claude connected on port ' + port);
+      toPlugin({ type: 'ui-connected' });
+    };
+    ws.onmessage = function (event) {
+      var msg;
+      try { msg = JSON.parse(event.data); } catch (e) { return; }
+      if (msg.type === 'command') toPlugin(msg);
+    };
+    ws.onclose = function () {
+      setStatus('Not connected');
+      retryTimer = setTimeout(connect, 2000);
+    };
+    ws.onerror = function () {};
+  }
+
+  // Commands this window sends to code.js itself (imports), by id.
+  var localSeq = 0;
+  var localPending = {};
+
+  function runCommand(command, params) {
+    return new Promise(function (resolve, reject) {
+      var id = 'ui-' + (++localSeq);
+      localPending[id] = { resolve: resolve, reject: reject };
+      toPlugin({ type: 'command', id: id, command: command, params: params });
+    });
+  }
+
+  var captureFrame = null;
+
+  window.onmessage = function (event) {
+    if (captureFrame && event.source === captureFrame.contentWindow) return;
+    var msg = event.data && event.data.pluginMessage;
+    if (!msg) return;
+    if (msg.type === 'log') {
+      log(msg.text);
+      if (busy && !/^[▶✓✗]/.test(msg.text)) setProgress(msg.text);
+      if (exporting && !/^[▶✓✗]/.test(msg.text)) setExportProgress(msg.text);
+      return;
+    }
+    if (msg.type === 'settings') { applySettings(msg.settings); return; }
+    if (msg.type === 'selection') { showSelection(msg); return; }
+    if (msg.type === 'auto-export') { showTab('export', false); autoExport = true; runAutoExport(); return; }
+    if (msg.type === 'response' && localPending[msg.id]) {
+      var p = localPending[msg.id];
+      delete localPending[msg.id];
+      if (msg.error) p.reject(new Error(msg.error));
+      else p.resolve(msg.result);
+      return;
+    }
+    if (msg.type === 'hello') {
+      document.getElementById('file').textContent = msg.fileName + ' — ' + msg.page.name;
+    }
+    if ((msg.type === 'hello' || msg.type === 'response') && ws && ws.readyState === 1) ws.send(JSON.stringify(msg));
+  };
+
+  document.getElementById('reconnect').onclick = connect;
+
+  // ---------------------------------------------------------------------------
+  // Import HTML, without the MCP server: render the page in a hidden frame,
+  // convert it with the same walker the server uses, and build it via code.js.
+  // ---------------------------------------------------------------------------
+
+  var picked = null; // { name, html }
+  var busy = false;
+
+  async function readHtmlFile(file) {
+    var buf = await file.arrayBuffer();
+    var head = new TextDecoder('latin1').decode(new Uint8Array(buf, 0, Math.min(buf.byteLength, 4096)));
+    var m = head.match(/<meta[^>]+charset\s*=\s*["']?\s*([\w-]+)/i);
+    var encoding = 'utf-8';
+    if (m) { try { new TextDecoder(m[1]); encoding = m[1]; } catch (e) {} }
+    return new TextDecoder(encoding).decode(buf);
+  }
+
+  async function pickFile(file) {
+    if (!file || busy) return;
+    if (!/\.html?$/i.test(file.name) && file.type !== 'text/html') {
+      setProgress(file.name + ' is not an .html file.', 'error');
+      return;
+    }
+    picked = { name: file.name, html: await readHtmlFile(file) };
+    var picker = document.getElementById('picked');
+    picker.textContent = file.name + '  (' + Math.max(1, Math.round(file.size / 1024)) + ' KB)';
+    picker.hidden = false;
+    document.getElementById('drop-hint').hidden = true;
+    document.getElementById('pick').textContent = 'choose another file';
+    importBtn.disabled = false;
+    setProgress('');
+  }
+
+  var fileInput = document.getElementById('file-input');
+  document.getElementById('pick').onclick = function () { fileInput.click(); };
+  fileInput.onchange = function () { pickFile(fileInput.files[0]); fileInput.value = ''; };
+
+  var drop = document.getElementById('drop');
+  document.addEventListener('dragover', function (e) { e.preventDefault(); drop.className = 'over'; });
+  document.addEventListener('dragleave', function (e) { if (!e.relatedTarget) drop.className = ''; });
+  document.addEventListener('drop', function (e) {
+    e.preventDefault();
+    drop.className = '';
+    pickFile(e.dataTransfer.files[0]);
+  });
+
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+  chips.forEach(function (chip) {
+    chip.onclick = function () {
+      chip.setAttribute('aria-pressed', chip.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+      saveSettings();
+    };
+  });
+
+  function selectedWidths() {
+    var widths = chips
+      .filter(function (c) { return c.getAttribute('aria-pressed') === 'true'; })
+      .map(function (c) { return +c.dataset.width; });
+    document.getElementById('custom-widths').value.split(/[\s,]+/).forEach(function (v) {
+      var n = parseInt(v, 10);
+      if (n >= 200 && n <= 4000 && widths.indexOf(n) < 0) widths.push(n);
+    });
+    return widths.sort(function (a, b) { return b - a; });
+  }
+
+  function currentSettings() {
+    return {
+      widths: chips.filter(function (c) { return c.getAttribute('aria-pressed') === 'true'; }).map(function (c) { return +c.dataset.width; }),
+      customWidths: document.getElementById('custom-widths').value,
+      height: parseInt(document.getElementById('opt-height').value, 10) || 900,
+      colorScheme: document.getElementById('opt-scheme').value,
+      selector: document.getElementById('opt-selector').value.trim(),
+      fullPage: document.getElementById('opt-fullpage').checked,
+      javascript: document.getElementById('opt-js').checked,
+      tab: activeTab,
+      exportLayout: document.getElementById('exp-layout').value,
+      exportFonts: document.getElementById('exp-fonts').checked,
+      exportShortcut: exportShortcut,
+    };
+  }
+
+  function applySettings(s) {
+    if (!s) return;
+    if (s.widths) chips.forEach(function (c) { c.setAttribute('aria-pressed', String(s.widths.indexOf(+c.dataset.width) >= 0)); });
+    if (s.customWidths != null) document.getElementById('custom-widths').value = s.customWidths;
+    if (s.height) document.getElementById('opt-height').value = s.height;
+    if (s.colorScheme) document.getElementById('opt-scheme').value = s.colorScheme;
+    if (s.selector != null) document.getElementById('opt-selector').value = s.selector;
+    if (s.fullPage != null) document.getElementById('opt-fullpage').checked = s.fullPage;
+    if (s.javascript != null) document.getElementById('opt-js').checked = s.javascript;
+    if (s.exportLayout) document.getElementById('exp-layout').value = s.exportLayout;
+    if (s.tab) showTab(s.tab, false);
+    if (s.exportFonts != null) document.getElementById('exp-fonts').checked = s.exportFonts;
+    if (s.exportShortcut !== undefined) setShortcut(s.exportShortcut, false);
+  }
+
+  function saveSettings() {
+    toPlugin({ type: 'save-settings', settings: currentSettings() });
+  }
+  ['custom-widths', 'opt-height', 'opt-scheme', 'opt-selector', 'opt-fullpage', 'opt-js', 'exp-layout', 'exp-fonts'].forEach(function (id) {
+    document.getElementById(id).addEventListener('change', saveSettings);
+  });
+
+  // Runs inside the hidden page frame (injected by preparePage): waits for the
+  // page to load, converts it to a layer tree and posts it back to this window.
+  function captureInFrame(opts) {
+    var started = false;
+    function reply(msg) {
+      msg.captureToken = opts.token;
+      parent.postMessage(msg, '*');
+    }
+    async function run() {
+      if (started) return;
+      started = true;
+      try {
+        if (opts.waitMs) await new Promise(function (r) { setTimeout(r, opts.waitMs); });
+        await settleInPage();
+        var result = walkPage({ selector: opts.selector, fullPage: opts.fullPage, collectRasterElements: true });
+        var svgs = {};
+        (function collect(n) {
+          if (n._rasterFallback) svgs[n._rasterFallback] = n.svg;
+          (n.children || []).forEach(collect);
+        })(result.tree);
+        var assets = {};
+        var warnings = [];
+        (await rasterizeInPage(result.rasters, result.rasterElements, svgs)).forEach(function (d) {
+          if (!d.error) assets[d.id] = { mime: d.mime, data: d.data };
+          else if (!svgs[d.id]) warnings.push(d.error);
+        });
+        var urls = {};
+        result.images.forEach(function (i) { urls[i.id] = i.url; });
+        (await fetchImagesInPage(result.images)).forEach(function (f) {
+          if (f.error) warnings.push('Image ' + urls[f.id].slice(0, 120) + ' failed: ' + f.error);
+          else assets[f.id] = { mime: f.mime, data: f.data };
+        });
+        reply({ ok: true, tree: result.tree, assets: assets, stats: result.stats, warnings: warnings });
+      } catch (e) {
+        reply({ ok: false, error: String((e && e.message) || e) });
+      }
+    }
+    if (document.readyState === 'complete') run();
+    else window.addEventListener('load', run);
+    setTimeout(run, 20000); // pages whose load event never fires
+  }
+
+  var CAPTURE_CODE = [walkPage, settleInPage, fetchImagesInPage, rasterizeInPage, captureInFrame].map(String).join('\n\n');
+
+  function preparePage(html, opts) {
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    // Saved pages (e.g. SingleFile) ship a CSP that would block the capture
+    // script's fetch() of their own images.
+    doc.querySelectorAll('meta[http-equiv]').forEach(function (m) {
+      if (/^(content-security-policy|refresh)$/i.test(m.httpEquiv.trim())) m.remove();
+    });
+    // The frame is never on screen, so lazy images would never load.
+    doc.querySelectorAll('[loading=lazy]').forEach(function (el) { el.setAttribute('loading', 'eager'); });
+    if (!opts.javascript) {
+      doc.querySelectorAll('script').forEach(function (s) { s.remove(); });
+      doc.querySelectorAll('*').forEach(function (el) {
+        Array.prototype.slice.call(el.attributes).forEach(function (a) {
+          if (/^on/i.test(a.name)) el.removeAttribute(a.name);
+        });
+      });
+    }
+    // Like headless Chrome's --hide-scrollbars: scrollbars take no layout space.
+    var style = doc.createElement('style');
+    style.textContent = '::-webkit-scrollbar { display: none !important; }';
+    doc.head.appendChild(style);
+    var script = doc.createElement('script');
+    script.textContent = CAPTURE_CODE + '\n\ncaptureInFrame(' + JSON.stringify(opts).replace(/</g, '\\u003c') + ');';
+    doc.head.insertBefore(script, doc.head.firstChild);
+    var doctype = doc.doctype ? new XMLSerializer().serializeToString(doc.doctype) : '';
+    return doctype + doc.documentElement.outerHTML;
+  }
+
+  function renderPage(html, opts) {
+    return new Promise(function (resolve, reject) {
+      opts.token = 'capture-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      var frame = document.createElement('iframe');
+      // No allow-same-origin: the imported page can't reach this window or code.js.
+      frame.setAttribute('sandbox', 'allow-scripts');
+      frame.className = 'stage';
+      frame.style.width = opts.width + 'px';
+      frame.style.height = opts.height + 'px';
+      frame.style.colorScheme = opts.colorScheme; // the page's prefers-color-scheme
+      var timer = setTimeout(function () { finish(new Error('The page took more than 2 minutes to render.')); }, 120000);
+      function onMessage(event) {
+        var d = event.data;
+        if (event.source !== frame.contentWindow || !d || d.captureToken !== opts.token) return;
+        finish(d.ok ? null : new Error(d.error), d);
+      }
+      function finish(err, data) {
+        clearTimeout(timer);
+        window.removeEventListener('message', onMessage);
+        frame.remove();
+        if (captureFrame === frame) captureFrame = null;
+        if (err) reject(err);
+        else resolve(data);
+      }
+      window.addEventListener('message', onMessage);
+      frame.srcdoc = preparePage(html, opts);
+      captureFrame = frame;
+      document.body.appendChild(frame);
+    });
+  }
+
+  function setBusy(on) {
+    busy = on;
+    importBtn.disabled = on || !picked;
+    importBtn.textContent = on ? 'Importing…' : 'Import to Figma';
+  }
+
+  async function runImport() {
+    if (!picked || busy) return;
+    var widths = selectedWidths();
+    if (!widths.length) { setProgress('Pick at least one width.', 'error'); return; }
+    var s = currentSettings();
+    var file = picked;
+    var baseName = file.name.replace(/\.[^.]+$/, '');
+    var totalLayers = 0;
+    var notes = 0;
+    setBusy(true);
+    try {
+      for (var i = 0; i < widths.length; i++) {
+        var width = widths[i];
+        setProgress('Rendering at ' + width + 'px…');
+        var cap = await renderPage(file.html, {
+          width: width,
+          height: Math.min(4000, Math.max(200, s.height)),
+          fullPage: s.fullPage,
+          javascript: s.javascript,
+          colorScheme: s.colorScheme,
+          selector: s.selector || null,
+          waitMs: 600,
+        });
+        cap.tree.name = baseName + ' — ' + width + 'px';
+        // Let code.js auto-place the frame to the right of existing content.
+        delete cap.tree.x;
+        delete cap.tree.y;
+        var st = cap.stats;
+        log('[' + width + 'px] ' + st.elements + ' elements → ' + st.texts + ' text, ' + st.svgs + ' SVG, ' +
+          st.images + ' images, ' + st.rasters + ' drawn' + (st.truncated ? ' (TRUNCATED: page too large)' : ''));
+        setProgress('Building the ' + width + 'px frame…');
+        var res = await runCommand('create_nodes', { nodes: [cap.tree], assets: cap.assets, select: true, zoom: true });
+        totalLayers += res.layerCount;
+        var fonts = Object.keys(res.missingFonts || {}).map(function (f) { return f + ' → ' + res.missingFonts[f]; });
+        if (fonts.length) log('Fonts not installed, replaced: ' + fonts.join(', '));
+        var warns = cap.warnings.concat(res.warnings || [], res.errors || []);
+        notes += warns.length + (fonts.length ? 1 : 0);
+        warns.slice(0, 12).forEach(function (w) { log('! ' + w); });
+      }
+      setProgress('Imported ' + widths.length + (widths.length > 1 ? ' frames' : ' frame') + ' (' + totalLayers + ' layers).' + notesHint(notes), 'ok');
+    } catch (e) {
+      setProgress(e.message, 'error');
+      log('✗ import: ' + e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  importBtn.onclick = runImport;
+
+  // ---------------------------------------------------------------------------
+  // Export the selected board as one self-contained .html file (code.js builds it).
+  // ---------------------------------------------------------------------------
+
+  var exportBtn = document.getElementById('export-html');
+  var copyBtn = document.getElementById('copy-html');
+  var selNameEl = document.getElementById('sel-name');
+  var exportProgressEl = document.getElementById('export-progress');
+  var exporting = false;
+  var selected = null;
+  var autoExport = false; // set when the plugin was started with "Export selection as HTML"
+
+
+  // ---------------------------------------------------------------------------
+  // Download shortcut: works while this window is focused; the user can change it.
+  // Stored as { code, ctrl, alt, shift, meta } (e.code, so it doesn't depend on
+  // the keyboard layout) or null for no shortcut.
+  // ---------------------------------------------------------------------------
+
+  var IS_MAC = /Mac/i.test(navigator.platform || navigator.userAgent);
+  // Defaults chosen to stay clear of Figma's own shortcuts (⌘⇧E / Ctrl+Shift+E is Figma's Export).
+  var DEFAULT_SHORTCUT = IS_MAC
+    ? { code: 'KeyE', ctrl: true, alt: false, shift: true, meta: false }
+    : { code: 'KeyE', ctrl: false, alt: true, shift: true, meta: false };
+  var exportShortcut = DEFAULT_SHORTCUT;
+  var recording = false;
+  var shortcutBtn = document.getElementById('shortcut-rec');
+  var shortcutHint = document.getElementById('shortcut-hint');
+  var MODIFIER_CODES = /^(Shift|Control|Alt|Meta|OS|CapsLock|Fn)/;
+  var KEY_NAMES = { Minus: '-', Equal: '=', BracketLeft: '[', BracketRight: ']', Backslash: '\\', Semicolon: ';', Quote: "'",
+    Comma: ',', Period: '.', Slash: '/', Backquote: '`', Space: 'Space', Enter: '↩', Tab: 'Tab',
+    ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓' };
+
+  // Figma (and macOS/Windows) shortcuts a custom one would fight with. "P" = ⌘ on Mac, Ctrl on Windows.
+  var FIGMA_TAKEN = {
+    'P+Shift': { E: 'Export', C: 'Copy as PNG', V: 'Paste over selection', H: 'Show/hide selection', L: 'Lock/unlock',
+      K: 'Place image', G: 'Ungroup' },
+    'P+Alt': { P: 'Run last plugin', C: 'Copy properties', V: 'Paste properties', G: 'Frame selection', K: 'Create component',
+      B: 'Detach instance', O: 'Outline stroke' },
+  };
+
+  function keyName(code) {
+    if (/^Key[A-Z]$/.test(code)) return code.slice(3);
+    if (/^Digit\d$/.test(code)) return code.slice(5);
+    if (/^Numpad/.test(code)) return 'Num' + code.slice(6);
+    return KEY_NAMES[code] || code;
+  }
+
+  function shortcutLabel(sc) {
+    if (!sc) return 'None';
+    var k = keyName(sc.code);
+    if (IS_MAC) return (sc.ctrl ? '⌃' : '') + (sc.alt ? '⌥' : '') + (sc.shift ? '⇧' : '') + (sc.meta ? '⌘' : '') + k;
+    return [sc.ctrl && 'Ctrl', sc.alt && 'Alt', sc.shift && 'Shift', sc.meta && 'Win', k].filter(Boolean).join('+');
+  }
+
+  function sameShortcut(a, b) {
+    return !!a && !!b && a.code === b.code && !!a.ctrl === !!b.ctrl && !!a.alt === !!b.alt && !!a.shift === !!b.shift && !!a.meta === !!b.meta;
+  }
+
+  function shortcutConflict(sc) {
+    if (!sc) return null;
+    var primary = IS_MAC ? sc.meta : sc.ctrl;
+    var other = IS_MAC ? sc.ctrl : sc.meta;
+    var k = keyName(sc.code);
+    if (primary && !other) {
+      if (!sc.alt && !sc.shift) return (IS_MAC ? '⌘' : 'Ctrl+') + k + ' is used by Figma or the system.';
+      var group = FIGMA_TAKEN[sc.alt && !sc.shift ? 'P+Alt' : !sc.alt && sc.shift ? 'P+Shift' : ''];
+      if (group && group[k]) return 'Figma uses ' + shortcutLabel(sc) + ' for ' + group[k] + '.';
+    }
+    if (!IS_MAC && sc.ctrl && sc.alt) return 'Ctrl+Alt types characters on some keyboards (AltGr), e.g. € with E.';
+    if (IS_MAC && sc.alt && !sc.ctrl && !sc.meta) return '⌥ alone types special characters on a Mac; add ⌃ or ⌘.';
+    return null;
+  }
+
+  function renderShortcut() {
+    var label = shortcutLabel(exportShortcut);
+    shortcutBtn.textContent = recording ? 'Press keys…' : label;
+    shortcutBtn.className = 'shortcut' + (recording ? ' recording' : '');
+    var warn = !recording && shortcutConflict(exportShortcut);
+    shortcutHint.textContent = recording
+      ? 'Press a combination with ' + (IS_MAC ? '⌃, ⌥ or ⌘' : 'Ctrl, Alt or Win') + '. Esc cancels.'
+      : warn || (exportShortcut ? 'Works while this plugin window is focused.' : 'No shortcut for Download .html.');
+    shortcutHint.className = warn ? 'warn' : 'muted';
+    exportBtn.title = exportShortcut ? 'Shortcut: ' + label + ' while this window is focused' : '';
+    updateExportButtons();
+  }
+
+  function setShortcut(sc, save) {
+    exportShortcut = sc && sc.code ? { code: sc.code, ctrl: !!sc.ctrl, alt: !!sc.alt, shift: !!sc.shift, meta: !!sc.meta } : null;
+    recording = false;
+    renderShortcut();
+    if (save) saveSettings();
+  }
+
+  shortcutBtn.onclick = function () {
+    recording = !recording;
+    renderShortcut();
+  };
+  shortcutBtn.onblur = function () {
+    if (recording) { recording = false; renderShortcut(); }
+  };
+  document.getElementById('shortcut-reset').onclick = function () { setShortcut(DEFAULT_SHORTCUT, true); };
+  document.getElementById('shortcut-clear').onclick = function () { setShortcut(null, true); };
+
+  function setExportProgress(text, state) {
+    exportProgressEl.textContent = text;
+    exportProgressEl.className = state || 'muted';
+  }
+
+  function updateExportButtons() {
+    exportBtn.disabled = copyBtn.disabled = exporting || !selected;
+    exportBtn.innerHTML = exporting ? 'Exporting…'
+      : 'Download .html' + (exportShortcut ? '<kbd>' + shortcutLabel(exportShortcut) + '</kbd>' : '');
+  }
+
+  function showSelection(msg) {
+    selected = msg.node;
+    if (!selected) {
+      selNameEl.textContent = 'Select a board (frame) to export';
+      selNameEl.className = 'none';
+    } else {
+      selNameEl.textContent = (selected.name.trim() || selected.type) + '  ·  ' + selected.width + '×' + selected.height +
+        (msg.count > 1 ? '  (first of ' + msg.count + ' selected)' : '');
+      selNameEl.className = '';
+    }
+    updateExportButtons();
+  }
+
+  function formatSize(bytes) {
+    return bytes > 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB';
+  }
+
+  async function buildHtml() {
+    if (!selected || exporting) return null;
+    exporting = true;
+    updateExportButtons();
+    setExportProgress('Building HTML…');
+    try {
+      var res = await runCommand('export_html', {
+        id: selected.id,
+        layout: document.getElementById('exp-layout').value,
+        googleFonts: document.getElementById('exp-fonts').checked,
+      });
+      var st = res.stats;
+      log('HTML "' + res.name + '": ' + st.layers + ' layers, ' + st.texts + ' text, ' + st.svgs + ' SVG, ' + st.images + ' images' +
+        (st.rasters ? ', ' + st.rasters + ' PNG' : '') + ' (' + formatSize(res.bytes) + ')');
+      (res.warnings || []).slice(0, 12).forEach(function (w) { log('! ' + w); });
+      return res;
+    } catch (e) {
+      setExportProgress(e.message, 'error');
+      log('✗ export: ' + e.message);
+      return null;
+    } finally {
+      exporting = false;
+      updateExportButtons();
+    }
+  }
+
+  exportBtn.onclick = async function () {
+    var res = await buildHtml();
+    if (!res) return;
+    var url = URL.createObjectURL(new Blob([res.html], { type: 'text/html;charset=utf-8' }));
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = res.fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+    setExportProgress('Saved ' + res.fileName + ' (' + formatSize(res.bytes) + ').' + notesHint(res.warnings.length), 'ok');
+  };
+
+  // Recording a new shortcut, or pressing the current one (= Download .html).
+  document.addEventListener('keydown', function (e) {
+    var pressed = { code: e.code, ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey, meta: e.metaKey };
+    if (recording) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.code === 'Escape') { recording = false; renderShortcut(); return; }
+      if (!e.code || MODIFIER_CODES.test(e.code)) return; // wait for the actual key
+      if (!pressed.ctrl && !pressed.alt && !pressed.meta) {
+        shortcutHint.textContent = 'Add ' + (IS_MAC ? '⌃, ⌥ or ⌘' : 'Ctrl, Alt or Win') + ' so it does not fire while typing.';
+        shortcutHint.className = 'warn';
+        return;
+      }
+      setShortcut(pressed, true);
+      shortcutBtn.blur();
+      return;
+    }
+    if (sameShortcut(exportShortcut, pressed)) {
+      e.preventDefault();
+      if (!exportBtn.disabled) exportBtn.click();
+      else if (!selected) setExportProgress('Select a board in Figma first.', 'error');
+    }
+  }, true);
+
+  // Started from the "Export selection as HTML" menu command (or re-run with
+  // Figma's "Run last plugin" shortcut): download right away, keep the window open.
+  function runAutoExport() {
+    if (!autoExport) return;
+    autoExport = false;
+    if (!selected) { setExportProgress('Select a board in Figma, then click Download .html.', 'error'); return; }
+    exportBtn.click();
+  }
+
+  renderShortcut();
+
+  copyBtn.onclick = async function () {
+    var res = await buildHtml();
+    if (!res) return;
+    // navigator.clipboard is blocked in plugin windows; execCommand still works.
+    var ta = document.createElement('textarea');
+    ta.value = res.html;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    ta.remove();
+    if (ok) setExportProgress('HTML copied to the clipboard (' + formatSize(res.bytes) + ').' + notesHint(res.warnings.length), 'ok');
+    else setExportProgress('Copy failed. Use Download .html instead.', 'error');
+  };
+
+  // Keep the plugin window as tall as its content (e.g. when Options opens).
+  var app = document.getElementById('app');
+  new ResizeObserver(function () {
+    toPlugin({ type: 'resize', height: Math.ceil(app.getBoundingClientRect().height) + 24 });
+  }).observe(app);
+
+  toPlugin({ type: 'ui-ready' });
+  connect();
+</script>

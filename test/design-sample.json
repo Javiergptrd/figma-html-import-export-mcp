@@ -1,0 +1,73 @@
+[
+  {
+    "type": "FRAME",
+    "name": "Login — Desktop",
+    "width": 1200,
+    "height": 760,
+    "fills": [{ "type": "GRADIENT_LINEAR", "angle": 135, "stops": [{ "position": 0, "color": "#F7F7F8" }, { "position": 1, "color": "#EEF2FF" }] }],
+    "layout": { "mode": "HORIZONTAL", "justify": "center", "align": "center" },
+    "children": [
+      {
+        "type": "FRAME",
+        "name": "Card",
+        "width": 420,
+        "fills": ["#FFFFFF"],
+        "cornerRadius": 16,
+        "strokes": ["#E8E8EA"],
+        "strokeWeight": 1,
+        "effects": [{ "type": "DROP_SHADOW", "color": "#1A1A1A14", "x": 0, "y": 12, "blur": 32, "spread": -4 }],
+        "layout": { "mode": "VERTICAL", "gap": 20, "padding": 32 },
+        "children": [
+          {
+            "type": "FRAME", "name": "Brand", "fills": [],
+            "layout": { "mode": "HORIZONTAL", "gap": 10, "align": "center" },
+            "children": [
+              { "type": "SVG", "name": "logo", "svg": "<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><circle cx='12' cy='16' r='8' fill='#6366F1'/><circle cx='22' cy='10' r='5' fill='#A5B4FC'/><circle cx='22' cy='22' r='5' fill='#818CF8'/></svg>" },
+              { "type": "TEXT", "text": "ACME", "fontFamily": "Inter", "fontWeight": 600, "fontSize": 18, "letterSpacing": 2, "color": "#1F2937" }
+            ]
+          },
+          {
+            "type": "FRAME", "name": "Heading", "fills": [], "sizing": { "horizontal": "FILL" },
+            "layout": { "mode": "VERTICAL", "gap": 6 },
+            "children": [
+              { "type": "TEXT", "text": "Welcome back", "fontFamily": "Inter", "fontWeight": 700, "fontSize": 24, "color": "#1A1A1A" },
+              { "type": "TEXT", "text": "Sign in to manage your projects and settings securely.", "fontSize": 14, "lineHeight": 20, "color": "#6B7280", "sizing": { "horizontal": "FILL" },
+                "segments": [{ "start": 23, "end": 31, "fontWeight": 600, "color": "#1A1A1A" }] }
+            ]
+          },
+          {
+            "type": "FRAME", "name": "Field / Email", "fills": [], "sizing": { "horizontal": "FILL" },
+            "layout": { "mode": "VERTICAL", "gap": 6 },
+            "children": [
+              { "type": "TEXT", "text": "Email", "fontSize": 13, "fontWeight": 500, "color": "#1F2937" },
+              {
+                "type": "FRAME", "name": "Input", "height": 44, "sizing": { "horizontal": "FILL" },
+                "fills": ["#FFFFFF"], "strokes": ["#D4D4D8"], "strokeWeight": 1, "cornerRadius": 10,
+                "layout": { "mode": "HORIZONTAL", "padding": [0, 14], "align": "center" },
+                "children": [{ "type": "TEXT", "text": "name@example.com", "fontSize": 14, "color": "#9A9BA0" }]
+              }
+            ]
+          },
+          {
+            "type": "FRAME", "name": "Row", "fills": [], "sizing": { "horizontal": "FILL" },
+            "layout": { "mode": "HORIZONTAL", "justify": "space-between", "align": "center" },
+            "children": [
+              { "type": "TEXT", "text": "Remember me", "fontSize": 13, "color": "#6B7280" },
+              { "type": "TEXT", "text": "Forgot password?", "fontSize": 13, "fontWeight": 600, "color": "#4F46E5", "textDecoration": "UNDERLINE" }
+            ]
+          },
+          {
+            "type": "FRAME", "name": "Button / Primary", "height": 46, "sizing": { "horizontal": "FILL" },
+            "fills": ["#6366F1"], "cornerRadius": 10,
+            "layout": { "mode": "HORIZONTAL", "justify": "center", "align": "center", "gap": 8 },
+            "children": [{ "type": "TEXT", "text": "Sign in", "fontSize": 15, "fontWeight": 600, "color": "#FFFFFF" }]
+          },
+          {
+            "type": "ELLIPSE", "name": "Glow", "absolute": true, "x": 340, "y": -30, "width": 110, "height": 110,
+            "fills": [{ "type": "GRADIENT_RADIAL", "stops": [{ "position": 0, "color": "#6366F155" }, { "position": 1, "color": "#6366F100" }] }]
+          }
+        ]
+      }
+    ]
+  }
+]

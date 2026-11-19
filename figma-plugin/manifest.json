@@ -1,0 +1,31 @@
+{
+  "name": "HTML Import, Export and MCP Service Plugin",
+  "id": "html-import-export-mcp-local",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "menu": [
+    {
+      "name": "Open plugin window",
+      "command": "open"
+    },
+    {
+      "name": "Export selection as HTML",
+      "command": "export-html"
+    }
+  ],
+  "editorType": [
+    "figma"
+  ],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": [
+      "*"
+    ],
+    "devAllowedDomains": [
+      "http://localhost:3055",
+      "ws://localhost:3055"
+    ],
+    "reasoning": "Imported HTML pages can load their images, fonts and styles from any website. The plugin also connects to the local Claude MCP server on this computer."
+  }
+}

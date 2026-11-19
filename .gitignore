@@ -1,0 +1,10 @@
+node_modules/
+test/out/
+designs/
+exports/
+*.log
+.DS_Store
+.env
+.env.*
+.vscode/
+.idea/

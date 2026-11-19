@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Feature fixture</title>
+<style>
+  body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background: #f4f4f5; color: #1a1a1a; }
+  .wrap { padding: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06); position: relative; }
+  .hero { grid-column: span 3; height: 140px; border-radius: 18px; color: #fff; padding: 28px;
+          background: linear-gradient(120deg, #1f2937 0%, #374151 60%, #6366f1 100%); }
+  .hero h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: -0.5px; }
+  .eyebrow { text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; font-weight: 700; color: #6b7280; }
+  p { line-height: 1.5; margin: 8px 0; font-size: 14px; }
+  a { color: #4f46e5; text-decoration: underline; }
+  .badge { background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 160px; font-weight: 600; }
+  .borders { border-left: 4px solid #6366f1; border-bottom: 1px dashed #c4c4c8; padding: 8px 12px; }
+  .avatar { width: 48px; height: 48px; border-radius: 50%; background: radial-gradient(circle, #a5b4fc, #6366f1); }
+  select, input[type=text] { font: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid #d4d4d8; border-radius: 8px; width: 220px; background: #fff; }
+  .chev { appearance: none; background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") no-repeat right .75rem center/16px 12px; }
+  .float { position: absolute; top: -10px; right: -10px; z-index: 5; background: #e5484d; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 8px; }
+  .glass { backdrop-filter: blur(8px); background: rgba(255,255,255,.6); border: 1px solid rgba(255,255,255,.8); }
+  .row { display: flex; align-items: center; gap: 12px; }
+  .icon { width: 20px; height: 20px; color: #6366f1; }
+  .half { opacity: .5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Total balance</div>
+    <h1>$ 12,480.50</h1>
+    <span class="badge">▲ 4.75% this month</span>
+  </div>
+
+  <div class="card">
+    <span class="float">New</span>
+    <div class="eyebrow">Inline text</div>
+    <p>Mixed <b>bold</b> and <em>italic</em> runs. To change them, <a href="#">edit your profile</a> from the settings page.</p>
+    <p><span class="badge">Pending</span> this text starts halfway through a line after a badge and then continues on the next line.</p>
+    <div class="ellipsis">Café Crème Brûlée — a long label that gets cut</div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="avatar"></div>
+      <div><strong>Jane Doe</strong><br><span style="color:#6b7280;font-size:13px">Account owner</span></div>
+    </div>
+    <div class="borders" style="margin-top:16px">Per-side borders</div>
+    <div class="row" style="margin-top:16px">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M12 3v18"/></svg>
+      <span class="half">Semi-transparent</span>
+    </div>
+    <img id="img" alt="chart" style="margin-top:12px;border-radius:8px;width:120px;height:60px;object-fit:cover">
+  </div>
+
+  <div class="card glass">
+    <label class="eyebrow">Controls</label>
+    <div style="margin-top:10px"><select><option>Original order</option></select></div>
+    <div style="margin-top:10px"><select class="chev"><option>OPTION-01</option></select></div>
+    <div style="margin-top:10px"><input type="text" placeholder="name@example.com"></div>
+    <div style="margin-top:10px" class="row"><input type="checkbox" checked> Remember me <canvas id="cv" width="60" height="24"></canvas></div>
+  </div>
+</div>
+<script>
+  const c = document.getElementById('cv').getContext('2d');
+  c.fillStyle = '#6366f1'; c.fillRect(0, 0, 60, 24); c.fillStyle = '#1f2937'; c.fillRect(6, 6, 30, 12);
+  const k = document.createElement('canvas'); k.width = 240; k.height = 120;
+  const x = k.getContext('2d'); const g = x.createLinearGradient(0, 0, 240, 0);
+  g.addColorStop(0, '#e0e7ff'); g.addColorStop(1, '#6366f1'); x.fillStyle = g; x.fillRect(0, 0, 240, 120);
+  x.strokeStyle = '#1f2937'; x.lineWidth = 4; x.beginPath(); x.moveTo(0, 100); x.lineTo(80, 60); x.lineTo(160, 80); x.lineTo(240, 20); x.stroke();
+  document.getElementById('img').src = k.toDataURL('image/png');
+</script>
+</body>
+</html>
