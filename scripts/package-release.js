@@ -41,7 +41,7 @@ fs.writeFileSync(path.join(pluginDir, 'INSTALL.txt'), `HTML Import, Export and M
 Keep this folder where it is: Figma loads the plugin from it.
 Import and Export work without anything else. The Claude tab needs the MCP server
 (figma-html-import-export-mcp-full.zip) - see the README:
-https://github.com/Javiergptrd/figma-html-import-export-mcp
+https://github.com/jgptrd/figma-html-import-export-mcp
 `);
 zip(pluginDir, 'figma-plugin.zip');
 

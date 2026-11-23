@@ -4,7 +4,7 @@
 exports.** No account, no API key, no AI, no limits. Everything runs on your own computer, inside
 your own Figma.
 
-[![Download](https://img.shields.io/github/v/release/Javiergptrd/figma-html-import-export-mcp?label=download&color=6366f1)](https://github.com/Javiergptrd/figma-html-import-export-mcp/releases/latest)
+[![Download](https://img.shields.io/github/v/release/jgptrd/figma-html-import-export-mcp?label=download&color=6366f1)](https://github.com/jgptrd/figma-html-import-export-mcp/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-22c55e)](LICENSE)
 ![Free forever](https://img.shields.io/badge/price-free%20forever-22c55e)
 ![No account needed](https://img.shields.io/badge/account-not%20needed-0ea5e9)
@@ -59,7 +59,7 @@ your own Figma.
 ## Install (no command line)
 
 1. Download **`figma-plugin.zip`** from the
-   [latest release](https://github.com/Javiergptrd/figma-html-import-export-mcp/releases/latest)
+   [latest release](https://github.com/jgptrd/figma-html-import-export-mcp/releases/latest)
    and unzip it.
 2. Open **Figma Desktop** and any design file. (The browser version of Figma can't load plugins from
    a file.)

@@ -17,10 +17,10 @@ and carries out the server's commands.
 
 1. **Get the server.** Needs Node 18+, Figma Desktop, and Google Chrome, Chromium, Edge or Brave.
    Either download **`figma-html-import-export-mcp-full.zip`** from the
-   [latest release](https://github.com/Javiergptrd/figma-html-import-export-mcp/releases/latest)
+   [latest release](https://github.com/jgptrd/figma-html-import-export-mcp/releases/latest)
    (dependencies included, nothing to install) and unzip it, or clone the repository and install:
    ```bash
-   git clone https://github.com/Javiergptrd/figma-html-import-export-mcp.git
+   git clone https://github.com/jgptrd/figma-html-import-export-mcp.git
    ```
    ```bash
    cd figma-html-import-export-mcp && npm install
