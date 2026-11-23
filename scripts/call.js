@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Call one of the MCP tools from a terminal (handy when the MCP tools aren't
-// loaded in the current Claude session).
+// loaded in the current AI session).
 //
 // Usage: node scripts/call.js <tool> ['<json args>'] [--wait <sec>] [--file <name>] [--out <dir>]
 //   --wait  first wait up to <sec> seconds for the Figma plugin to connect

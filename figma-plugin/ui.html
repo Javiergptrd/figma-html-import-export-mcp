@@ -1,13 +1,15 @@
 <style>
   :root { color-scheme: light dark; }
+  html.figma-light { color-scheme: light; }
+  html.figma-dark { color-scheme: dark; }
   * { box-sizing: border-box; }
   body { font: 11px/1.45 Inter, system-ui, sans-serif; margin: 0; padding: 0; background: var(--figma-color-bg, #fff); color: var(--figma-color-text, #222); }
   h2 { font-size: 11px; font-weight: 600; margin: 0 0 8px; }
   .muted { color: var(--figma-color-text-secondary, #777); }
   .row { display: flex; align-items: center; gap: 8px; }
   .spacer { flex: 1; }
-  input, select { padding: 4px 6px; border: 1px solid var(--figma-color-border, #ccc); border-radius: 4px; background: transparent; color: inherit; font: inherit; min-width: 0; }
-  input[type=checkbox] { margin: 0; }
+  input:not([type=checkbox]), select { padding: 4px 6px; border: 1px solid var(--figma-color-border, #ccc); border-radius: 4px; background: transparent; color: inherit; font: inherit; min-width: 0; }
+  input[type=checkbox] { margin: 0; accent-color: var(--figma-color-bg-brand, #0d99ff); }
   button { padding: 4px 10px; border: 1px solid var(--figma-color-border, #ccc); border-radius: 5px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
   button:disabled { cursor: default; opacity: .5; }
   .link { border: 0; padding: 0; color: var(--figma-color-text-brand, #0d99ff); }
@@ -16,6 +18,11 @@
   .tab { display: flex; align-items: center; gap: 6px; padding: 9px 8px 8px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; color: var(--figma-color-text-secondary, #777); font-weight: 500; }
   .tab:hover { color: var(--figma-color-text, #222); }
   .tab[aria-selected=true] { color: var(--figma-color-text, #222); font-weight: 600; border-bottom-color: var(--figma-color-text, #222); }
+  .tab[hidden] { display: none; }
+  .tabs .spacer { flex: 1; }
+  .tab-icon { padding-left: 6px; padding-right: 6px; }
+  .toggle { gap: 6px; cursor: pointer; }
+  .toggle input { margin: 0; }
   .panel { padding: 12px; }
   .panel[hidden] { display: none; }
   .hint { margin-top: 4px; }
@@ -66,7 +73,9 @@
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" data-tab="import" aria-selected="true">Import</button>
     <button class="tab" role="tab" data-tab="export" aria-selected="false">Export</button>
-    <button class="tab" role="tab" data-tab="claude" aria-selected="false"><span id="tab-dot" class="dot"></span>Claude</button>
+    <button class="tab" role="tab" data-tab="ai" aria-selected="false" hidden><span id="tab-dot" class="dot"></span>AI</button>
+    <span class="spacer"></span>
+    <button class="tab tab-icon" role="tab" data-tab="settings" aria-selected="false" aria-label="Settings" title="Settings"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
 
   <div class="panel" id="panel-import" role="tabpanel">
@@ -134,21 +143,34 @@
     <div id="export-progress" class="muted"></div>
   </div>
 
-  <div class="panel claude" id="panel-claude" role="tabpanel" hidden>
-    <h2>Claude connection</h2>
+  <div class="panel ai" id="panel-ai" role="tabpanel" hidden>
+    <h2>AI connection (MCP)</h2>
     <div class="card">
       <div class="row">
-        <span id="dot" class="dot"></span><span id="status">Connecting…</span>
+        <span id="dot" class="dot"></span><span id="status">Off</span>
         <span class="spacer"></span>
         <input id="port" type="text" inputmode="numeric" value="3055" title="MCP server port" />
         <button id="reconnect">Reconnect</button>
       </div>
       <div id="file" class="muted hint"></div>
     </div>
-    <div class="field">
-      <label>Activity</label>
-      <div id="log"></div>
+    <div class="muted hint">Works with any AI app that supports MCP. <button class="link guide-link">Setup guide</button></div>
+    <div id="log-home-ai"></div>
+  </div>
+
+  <div class="panel settings" id="panel-settings" role="tabpanel" hidden>
+    <h2>Settings</h2>
+    <div class="card">
+      <label class="row toggle"><input id="ai-enabled" type="checkbox" /> <b>Connect to an AI assistant (MCP)</b></label>
+      <div class="muted hint">Optional. Lets an AI app that supports MCP (Claude, Cursor, VS Code, Windsurf and others) import pages, build layouts and export boards in this file, through a small server on your computer. While this is off, the plugin doesn&rsquo;t connect to any MCP server. <button class="link guide-link">Setup guide</button></div>
     </div>
+    <div id="log-home-settings">
+      <div class="field" id="activity">
+        <label>Activity</label>
+        <div id="log"></div>
+      </div>
+    </div>
+    <div class="muted hint" id="version"></div>
   </div>
 </div>
 
@@ -1380,17 +1402,23 @@ async function rasterizeInPage(rasters, elements, svgs) {
     dotEl.className = 'dot' + (state ? ' ' + state : '');
     var tabDot = document.getElementById('tab-dot');
     tabDot.className = dotEl.className;
-    tabDot.title = 'Claude: ' + text;
+    tabDot.title = 'AI: ' + text;
   }
 
   // ---------------------------------------------------------------------------
-  // Tabs: Import / Export / Claude. The last one used is remembered.
+  // Tabs: Import / Export / AI (only while AI is turned on) / Settings.
+  // The last one used is remembered.
   // ---------------------------------------------------------------------------
 
   var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
   var activeTab = 'import';
+  var aiEnabled = false;
+  var aiTab = document.querySelector('.tab[data-tab=ai]');
+  var aiToggle = document.getElementById('ai-enabled');
 
   function showTab(name, save) {
+    if (name === 'claude') name = 'ai'; // saved by versions before 1.5
+    if (name === 'ai' && !aiEnabled) name = 'import';
     if (!document.getElementById('panel-' + name)) return;
     activeTab = name;
     tabs.forEach(function (t) {
@@ -1398,7 +1426,7 @@ async function rasterizeInPage(rasters, elements, svgs) {
       t.setAttribute('aria-selected', String(on));
       document.getElementById('panel-' + t.dataset.tab).hidden = !on;
     });
-    if (name === 'claude') logEl.scrollTop = logEl.scrollHeight;
+    if (name === 'ai' || name === 'settings') logEl.scrollTop = logEl.scrollHeight;
     if (save) saveSettings();
   }
   tabs.forEach(function (t) { t.onclick = function () { showTab(t.dataset.tab, true); }; });
@@ -1410,7 +1438,12 @@ async function rasterizeInPage(rasters, elements, svgs) {
   }
 
   function notesHint(n) {
-    return n ? ' ' + n + (n > 1 ? ' notes' : ' note') + ' in the Claude tab.' : '';
+    return n ? ' ' + n + (n > 1 ? ' notes' : ' note') + ' in ' + logPlace() + '.' : '';
+  }
+
+  // The Activity log lives in the AI tab while AI is on, otherwise in Settings.
+  function logPlace() {
+    return aiEnabled ? 'the AI tab' : 'Settings (⚙)';
   }
 
   function setProgress(text, state) {
@@ -1423,10 +1456,47 @@ async function rasterizeInPage(rasters, elements, svgs) {
   }
 
   // ---------------------------------------------------------------------------
-  // Claude MCP server connection (optional: imports below work without it)
+  // AI connection: the local MCP server, which any MCP-capable AI app can start.
+  // Off by default. While off, no connection is opened at all.
   // ---------------------------------------------------------------------------
 
+  function disconnect() {
+    clearTimeout(retryTimer);
+    if (ws) { ws.onclose = null; try { ws.close(); } catch (e) {} }
+    ws = null;
+    setStatus('Off');
+  }
+
+  function setAiEnabled(on, save) {
+    on = !!on;
+    var changed = on !== aiEnabled;
+    aiEnabled = on;
+    aiToggle.checked = on;
+    aiTab.hidden = !on;
+    var home = document.getElementById(on ? 'log-home-ai' : 'log-home-settings');
+    home.appendChild(document.getElementById('activity'));
+    if (on) { if (changed || !ws) connect(); }
+    else {
+      if (changed) log('AI connection turned off');
+      disconnect();
+      if (activeTab === 'ai') showTab('settings', false);
+    }
+    if (save) saveSettings();
+  }
+
+  aiToggle.onchange = function () {
+    setAiEnabled(aiToggle.checked, false);
+    if (aiToggle.checked) showTab('ai', false);
+    saveSettings();
+  };
+
+  var GUIDE_URL = 'https://github.com/jgptrd/figma-html-import-export-mcp/blob/main/docs/ai-mcp.md';
+  Array.prototype.forEach.call(document.querySelectorAll('.guide-link'), function (b) {
+    b.onclick = function () { toPlugin({ type: 'open-url', url: GUIDE_URL }); };
+  });
+
   function connect() {
+    if (!aiEnabled) return;
     clearTimeout(retryTimer);
     if (ws) { ws.onclose = null; try { ws.close(); } catch (e) {} }
     var port = parseInt(portInput.value, 10) || 3055;
@@ -1439,7 +1509,7 @@ async function rasterizeInPage(rasters, elements, svgs) {
     }
     ws.onopen = function () {
       setStatus('Connected', 'on');
-      log('Claude connected on port ' + port);
+      log('AI server connected on port ' + port);
       toPlugin({ type: 'ui-connected' });
     };
     ws.onmessage = function (event) {
@@ -1448,7 +1518,7 @@ async function rasterizeInPage(rasters, elements, svgs) {
       if (msg.type === 'command') toPlugin(msg);
     };
     ws.onclose = function () {
-      setStatus('Not connected');
+      setStatus('Waiting for the MCP server');
       retryTimer = setTimeout(connect, 2000);
     };
     ws.onerror = function () {};
@@ -1490,11 +1560,12 @@ async function rasterizeInPage(rasters, elements, svgs) {
     }
     if (msg.type === 'hello') {
       document.getElementById('file').textContent = msg.fileName + ' — ' + msg.page.name;
+      if (msg.pluginVersion) document.getElementById('version').textContent = 'Plugin version ' + msg.pluginVersion;
     }
     if ((msg.type === 'hello' || msg.type === 'response') && ws && ws.readyState === 1) ws.send(JSON.stringify(msg));
   };
 
-  document.getElementById('reconnect').onclick = connect;
+  document.getElementById('reconnect').onclick = function () { saveSettings(); connect(); };
 
   // ---------------------------------------------------------------------------
   // Import HTML, without the MCP server: render the page in a hidden frame,
@@ -1574,10 +1645,14 @@ async function rasterizeInPage(rasters, elements, svgs) {
       exportLayout: document.getElementById('exp-layout').value,
       exportFonts: document.getElementById('exp-fonts').checked,
       exportShortcut: exportShortcut,
+      aiEnabled: aiEnabled,
+      aiPort: parseInt(portInput.value, 10) || 3055,
     };
   }
 
   function applySettings(s) {
+    if (s && s.aiPort) portInput.value = s.aiPort;
+    setAiEnabled(!!(s && s.aiEnabled), false);
     if (!s) return;
     if (s.widths) chips.forEach(function (c) { c.setAttribute('aria-pressed', String(s.widths.indexOf(+c.dataset.width) >= 0)); });
     if (s.customWidths != null) document.getElementById('custom-widths').value = s.customWidths;
@@ -1944,7 +2019,7 @@ async function rasterizeInPage(rasters, elements, svgs) {
       exporting = false;
       updateExportButtons();
     }
-    if (!results.length) setExportProgress(failed.length === 1 ? failed[0].replace(/^[^:]*: /, '') : 'None of the boards could be exported. See the Claude tab log.', 'error');
+    if (!results.length) setExportProgress(failed.length === 1 ? failed[0].replace(/^[^:]*: /, '') : 'None of the boards could be exported. See the Activity log in ' + logPlace() + '.', 'error');
     return results.length ? { results: results, failed: failed } : null;
   }
 
@@ -2022,7 +2097,7 @@ async function rasterizeInPage(rasters, elements, svgs) {
     if (!out) return;
     var res = out.results;
     var notes = res.reduce(function (s, r) { return s + (r.warnings || []).length; }, 0);
-    var failedNote = out.failed.length ? ' ' + out.failed.length + ' could not be exported (see the Claude tab log).' : '';
+    var failedNote = out.failed.length ? ' ' + out.failed.length + ' could not be exported (see the Activity log in ' + logPlace() + ').' : '';
     if (boards.length === 1) {
       saveFile(new Blob([res[0].html], { type: 'text/html;charset=utf-8' }), res[0].fileName);
       setExportProgress('Saved ' + res[0].fileName + ' (' + formatSize(res[0].bytes) + ').' + notesHint(notes), 'ok');
@@ -2097,5 +2172,5 @@ async function rasterizeInPage(rasters, elements, svgs) {
   }).observe(app);
 
   toPlugin({ type: 'ui-ready' });
-  connect();
+  // The AI connection starts once the saved settings say it is turned on (applySettings).
 </script>

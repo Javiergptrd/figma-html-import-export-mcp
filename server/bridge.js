@@ -2,7 +2,7 @@
 //
 // The first MCP instance to start becomes the "host": it listens on
 // 127.0.0.1:<port> and the Figma plugin connects to it. Any additional MCP
-// instances (e.g. a second Claude session) connect to the host as "peers" and
+// instances (e.g. a second AI app or chat session) connect to the host as "peers" and
 // have their commands relayed to the plugin. If the host goes away, the next
 // command from a peer promotes it to host.
 import { WebSocketServer, WebSocket } from 'ws';
@@ -195,4 +195,4 @@ export class FigmaBridge {
 
 export const NOT_CONNECTED =
   'Figma plugin is not connected. In Figma Desktop open a design file and run ' +
-  'Plugins → Development → "HTML Import, Export and MCP Service Plugin" (keep its window open), then retry.';
+  'Plugins → Development → "HTML Import, Export and MCP Service Plugin" (keep its window open). In the plugin, open Settings (gear icon) and turn on "Connect to an AI assistant (MCP)", then retry.';

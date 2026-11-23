@@ -59,9 +59,10 @@ try {
   const uiFrame = page.frames().find((f) => f.parentFrame() === page.mainFrame());
 
   await uiFrame.waitForFunction(() => document.getElementById('file').textContent.includes('Mock File'), { timeout: 5000 });
-  check(true, 'UI shows the open file without Claude');
+  check(true, 'UI shows the open file without an AI app');
   const status = await uiFrame.$eval('#status', (el) => el.textContent);
-  check(/not connected|cannot connect/i.test(status), 'Claude connection is optional', status);
+  check(status === 'Off', 'AI connection is off by default', status);
+  check(await uiFrame.$eval('.tab[data-tab=ai]', (t) => t.hidden), 'AI tab hidden until turned on in Settings');
   check(await uiFrame.$eval('#import', (b) => b.disabled), 'Import disabled until a file is chosen');
 
   const input = await uiFrame.$('#file-input');

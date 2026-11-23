@@ -9,7 +9,7 @@ your own Figma.
 ![Free forever](https://img.shields.io/badge/price-free%20forever-22c55e)
 ![No account needed](https://img.shields.io/badge/account-not%20needed-0ea5e9)
 
-![The plugin window: Import, Export and Claude tabs](docs/images/plugin-tabs.png)
+![The plugin window: Import, Export and AI tabs](docs/images/plugin-tabs.png)
 
 ## Why this plugin
 
@@ -19,7 +19,8 @@ your own Figma.
 | ✅ **Unlimited exports** | Export any board to a clean HTML file, as often as you want. |
 | ✅ **100% free** | No trial, no paid plan, no "pro" features held back. MIT license, commercial use included. |
 | ✅ **No account, no API key** | Install it and use it. Nothing to sign up for, nothing to paste in. |
-| ✅ **No AI required** | Import and Export are plain, predictable converters. AI is an optional extra, not a requirement. |
+| ✅ **No AI required** | Import and Export are plain, predictable converters. AI is an optional extra, off by default. |
+| ✅ **Works with any AI, if you want** | Optional MCP connection for Claude, Cursor, VS Code, Windsurf, Gemini, Codex and other MCP apps. |
 | ✅ **Private by design** | Your designs and HTML files are processed locally in Figma and are never uploaded anywhere. |
 | ✅ **Open source** | Read every line, change it, and build your own version. |
 
@@ -89,14 +90,17 @@ file for each board.
   downloads the selected board in one step. After that, Figma's **Run last plugin** (**⌥⌘P**,
   Ctrl+Alt+P on Windows) repeats it from anywhere.
 
-## Bonus: design with Claude (optional)
+## Bonus: work with any AI app (optional, off by default)
 
-The plugin's third tab, **Claude**, can connect to a small MCP server on your computer so
-[Claude Code](https://claude.com/claude-code) can import pages, build layouts and export frames for
-you. It is **an extra feature only**: you don't need it, an AI subscription or any account to use
-Import and Export.
+If you want, an AI assistant can work in Figma for you: import pages, build layouts, edit layers
+and export boards. It works with **any AI app that supports MCP**: Claude, Cursor, VS Code (GitHub
+Copilot), Windsurf, Gemini CLI, Codex CLI and more.
 
-Setup and the list of Claude tools: **[docs/claude-mcp.md](docs/claude-mcp.md)**.
+It is **off by default** and completely optional. Turn it on in the plugin under **Settings (gear
+icon) → Connect to an AI assistant (MCP)**; only then does the **AI** tab appear. While it is off,
+the plugin doesn't connect to any MCP server.
+
+Setup for each app and the list of tools: **[docs/ai-mcp.md](docs/ai-mcp.md)**.
 
 ## Good to know
 
@@ -104,7 +108,7 @@ Setup and the list of Claude tools: **[docs/claude-mcp.md](docs/claude-mcp.md)**
   `::before`/`::after` decorations are skipped, and CSS transforms are flattened.
 - Figma can only use fonts installed on your computer. Missing fonts fall back to Inter and the
   plugin tells you which ones were replaced.
-- Importing straight from a website URL needs the optional Claude setup, because most sites don't
+- Importing straight from a website URL needs the optional AI setup, because most sites don't
   allow other pages to download their HTML.
 
 ## Contributing

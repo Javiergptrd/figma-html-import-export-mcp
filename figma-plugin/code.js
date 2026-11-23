@@ -20,7 +20,7 @@ function post(msg) {
   figma.ui.postMessage(msg);
 }
 
-var PLUGIN_VERSION = '1.4.0';
+var PLUGIN_VERSION = '1.5.0';
 var SETTINGS_KEY = 'importSettings';
 var autoExportSent = false;
 
@@ -50,6 +50,7 @@ figma.ui.onmessage = function (msg) {
     });
   }
   if (msg.type === 'save-settings') figma.clientStorage.setAsync(SETTINGS_KEY, msg.settings);
+  if (msg.type === 'open-url' && /^https:\/\/github\.com\//.test(msg.url)) figma.openExternal(msg.url);
   if (msg.type === 'resize') figma.ui.resize(UI_WIDTH, Math.max(160, Math.min(900, Math.round(msg.height) || 470)));
   if (msg.type === 'command') {
     queue.push(msg);

@@ -39,9 +39,11 @@ fs.writeFileSync(path.join(pluginDir, 'INSTALL.txt'), `HTML Import, Export and M
 4. Run it from Plugins > Development > HTML Import, Export and MCP Service Plugin.
 
 Keep this folder where it is: Figma loads the plugin from it.
-Import and Export work without anything else. The Claude tab needs the MCP server
-(figma-html-import-export-mcp-full.zip) - see the README:
-https://github.com/jgptrd/figma-html-import-export-mcp
+Import and Export work without anything else: no account, no AI, no limits.
+Optional: to let an AI app (Claude, Cursor, VS Code...) work in Figma, turn on
+Settings (gear icon) > "Connect to an AI assistant (MCP)" and set up the MCP
+server (figma-html-import-export-mcp-full.zip). Guide:
+https://github.com/jgptrd/figma-html-import-export-mcp/blob/main/docs/ai-mcp.md
 `);
 zip(pluginDir, 'figma-plugin.zip');
 

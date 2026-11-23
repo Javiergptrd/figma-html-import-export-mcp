@@ -1,7 +1,7 @@
 {
   "name": "figma-html-import-export-mcp",
-  "version": "1.1.0",
-  "description": "MCP server and Figma plugin that import HTML into Figma, export Figma frames to HTML, and let Claude design directly on the Figma canvas.",
+  "version": "1.2.0",
+  "description": "MCP server and Figma plugin that import HTML into Figma, export Figma frames to HTML, and let any MCP-capable AI app design directly on the Figma canvas.",
   "keywords": [
     "mcp",
     "model-context-protocol",
