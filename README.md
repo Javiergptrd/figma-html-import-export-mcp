@@ -111,6 +111,12 @@ Setup for each app and the list of tools: **[docs/ai-mcp.md](docs/ai-mcp.md)**.
 - Importing straight from a website URL needs the optional AI setup, because most sites don't
   allow other pages to download their HTML.
 
+## How it was built
+
+This plugin was built with AI assistance ([Claude Code](https://claude.com/claude-code)), with the
+features, design decisions and testing in Figma done by a person. All the code is here to
+read, along with automated tests you can run with `npm test`.
+
 ## Contributing
 
 Ideas, bug reports and pull requests are welcome. See **[docs/development.md](docs/development.md)**
