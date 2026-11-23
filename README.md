@@ -46,9 +46,10 @@ your own Figma.
 - Options: light or dark appearance, import only one element (CSS selector), full page height, and
   whether to run the page's scripts
 
-### Export a board as HTML
+### Export boards as HTML
 
-- One **self-contained `.html` file**: images embedded, icons as inline SVG, nothing else to ship
+- **Export many boards at once**: select several frames and get one `.zip` with an `.html` file for each
+- One **self-contained `.html` file** per board: images embedded, icons as inline SVG, nothing else to ship
 - **Auto layout becomes flexbox**, or choose fixed positions for a pixel-exact copy
 - **Readable CSS** with class names taken from your layer names
 - Gradients, shadows, blurs, strokes, corner radius and text styles carried over
@@ -78,7 +79,9 @@ existing work.
 > [SingleFile](https://github.com/gildas-lormeau/SingleFile) browser extension. Pages saved as
 > "HTML + folder of files" lose their local images and styles.
 
-**Export:** select a frame, open the **Export** tab, and click **Download .html** or **Copy code**.
+**Export:** select one or more frames, open the **Export** tab, and click **Download .html** (or
+**Copy code** for a single board). With several boards selected you get one `.zip` with an `.html`
+file for each board.
 
 - Shortcut: **⌃⇧E** on Mac, **Alt+Shift+E** on Windows, while the plugin window is focused. Click
   the **Shortcut** box to set your own keys; the plugin warns you if Figma already uses them.

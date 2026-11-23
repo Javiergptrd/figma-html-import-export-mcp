@@ -43,6 +43,7 @@
 
   #sel-name { font-weight: 600; word-break: break-word; }
   #sel-name.none { font-weight: 400; color: var(--figma-color-text-secondary, #777); }
+  #sel-list { margin-top: 4px; word-break: break-word; }
   .export .opts { margin-top: 12px; }
   .export .buttons { display: flex; gap: 6px; margin-top: 12px; }
   #export-html { flex: 1; padding: 7px 10px; border: 0; background: var(--figma-color-bg-brand, #0d99ff); color: var(--figma-color-text-onbrand, #fff); font-weight: 600; }
@@ -105,10 +106,11 @@
   </div>
 
   <div class="panel export" id="panel-export" role="tabpanel" hidden>
-    <h2>Export a board as HTML</h2>
+    <h2>Export boards as HTML</h2>
     <div class="card">
-      <div class="muted">Selected board</div>
-      <div id="sel-name" class="none">Select a board (frame) to export</div>
+      <div class="muted" id="sel-label">Selected board</div>
+      <div id="sel-name" class="none">Select one or more boards (frames) to export</div>
+      <div id="sel-list" class="muted" hidden></div>
     </div>
     <div class="opts">
       <label for="exp-layout">Layout</label>
@@ -1866,20 +1868,40 @@ async function rasterizeInPage(rasters, elements, svgs) {
   }
 
   function updateExportButtons() {
-    exportBtn.disabled = copyBtn.disabled = exporting || !selected;
+    var many = selectedAll.length > 1;
+    exportBtn.disabled = exporting || !selected;
+    copyBtn.disabled = exporting || !selected || many;
+    copyBtn.title = many ? 'Copy works with one board. Download saves all of them.' : 'Copy the HTML code to the clipboard';
     exportBtn.innerHTML = exporting ? 'Exporting…'
-      : 'Download .html' + (exportShortcut ? '<kbd>' + shortcutLabel(exportShortcut) + '</kbd>' : '');
+      : (many ? 'Download ' + selectedAll.length + ' boards (.zip)' : 'Download .html') +
+        (exportShortcut ? '<kbd>' + shortcutLabel(exportShortcut) + '</kbd>' : '');
   }
 
+  var selectedAll = [];   // every selected board, in selection order
+  var selectedPage = '';
+  var selLabelEl = document.getElementById('sel-label');
+  var selListEl = document.getElementById('sel-list');
+  var boardLabel = function (n) { return (n.name.trim() || n.type) + '  ·  ' + n.width + '×' + n.height; };
+
   function showSelection(msg) {
-    selected = msg.node;
+    selectedAll = msg.nodes || (msg.node ? [msg.node] : []);
+    selected = selectedAll[0] || null;
+    selectedPage = msg.page || '';
+    if (!exporting) setExportProgress('');
+    selListEl.hidden = true;
+    selLabelEl.textContent = selectedAll.length > 1 ? 'Selected boards' : 'Selected board';
     if (!selected) {
-      selNameEl.textContent = 'Select a board (frame) to export';
+      selNameEl.textContent = 'Select one or more boards (frames) to export';
       selNameEl.className = 'none';
-    } else {
-      selNameEl.textContent = (selected.name.trim() || selected.type) + '  ·  ' + selected.width + '×' + selected.height +
-        (msg.count > 1 ? '  (first of ' + msg.count + ' selected)' : '');
+    } else if (selectedAll.length === 1) {
+      selNameEl.textContent = boardLabel(selected);
       selNameEl.className = '';
+    } else {
+      selNameEl.textContent = selectedAll.length + ' boards, one .html file each';
+      selNameEl.className = '';
+      var names = selectedAll.slice(0, 4).map(function (n) { return n.name.trim() || n.type; });
+      selListEl.textContent = names.join(', ') + (selectedAll.length > 4 ? ' and ' + (selectedAll.length - 4) + ' more' : '');
+      selListEl.hidden = false;
     }
     updateExportButtons();
   }
@@ -1888,44 +1910,130 @@ async function rasterizeInPage(rasters, elements, svgs) {
     return bytes > 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB';
   }
 
-  async function buildHtml() {
-    if (!selected || exporting) return null;
+  async function exportOne(board) {
+    var res = await runCommand('export_html', {
+      id: board.id,
+      layout: document.getElementById('exp-layout').value,
+      googleFonts: document.getElementById('exp-fonts').checked,
+    });
+    var st = res.stats;
+    log('HTML "' + res.name + '": ' + st.layers + ' layers, ' + st.texts + ' text, ' + st.svgs + ' SVG, ' + st.images + ' images' +
+      (st.rasters ? ', ' + st.rasters + ' PNG' : '') + ' (' + formatSize(res.bytes) + ')');
+    (res.warnings || []).slice(0, 12).forEach(function (w) { log('! ' + w); });
+    return res;
+  }
+
+  // Export the given boards one after another. Returns { results, failed }.
+  async function buildHtml(boards) {
+    boards = boards || (selected ? [selected] : []);
+    if (!boards.length || exporting) return null;
     exporting = true;
     updateExportButtons();
-    setExportProgress('Building HTML…');
+    var results = [], failed = [];
     try {
-      var res = await runCommand('export_html', {
-        id: selected.id,
-        layout: document.getElementById('exp-layout').value,
-        googleFonts: document.getElementById('exp-fonts').checked,
-      });
-      var st = res.stats;
-      log('HTML "' + res.name + '": ' + st.layers + ' layers, ' + st.texts + ' text, ' + st.svgs + ' SVG, ' + st.images + ' images' +
-        (st.rasters ? ', ' + st.rasters + ' PNG' : '') + ' (' + formatSize(res.bytes) + ')');
-      (res.warnings || []).slice(0, 12).forEach(function (w) { log('! ' + w); });
-      return res;
-    } catch (e) {
-      setExportProgress(e.message, 'error');
-      log('✗ export: ' + e.message);
-      return null;
+      for (var i = 0; i < boards.length; i++) {
+        setExportProgress(boards.length > 1 ? 'Building ' + (i + 1) + ' of ' + boards.length + ': ' + (boards[i].name.trim() || boards[i].type) + '…' : 'Building HTML…');
+        try {
+          results.push(await exportOne(boards[i]));
+        } catch (e) {
+          failed.push((boards[i].name.trim() || boards[i].type) + ': ' + e.message);
+          log('✗ export "' + boards[i].name + '": ' + e.message);
+        }
+      }
     } finally {
       exporting = false;
       updateExportButtons();
     }
+    if (!results.length) setExportProgress(failed.length === 1 ? failed[0].replace(/^[^:]*: /, '') : 'None of the boards could be exported. See the Claude tab log.', 'error');
+    return results.length ? { results: results, failed: failed } : null;
   }
 
-  exportBtn.onclick = async function () {
-    var res = await buildHtml();
-    if (!res) return;
-    var url = URL.createObjectURL(new Blob([res.html], { type: 'text/html;charset=utf-8' }));
+  function saveFile(blob, fileName) {
+    var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = res.fileName;
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
-    setExportProgress('Saved ' + res.fileName + ' (' + formatSize(res.bytes) + ').' + notesHint(res.warnings.length), 'ok');
+  }
+
+  // File names that stay unique inside the zip: "Card.html", "Card (2).html"…
+  function uniqueNames(names) {
+    var seen = {};
+    return names.map(function (n) {
+      var key = n.toLowerCase();
+      if (!seen[key]) { seen[key] = 1; return n; }
+      var base = n.replace(/\.html$/i, ''), k = ++seen[key], out;
+      do { out = base + ' (' + k + ').html'; } while (seen[out.toLowerCase()] && ++k);
+      seen[out.toLowerCase()] = 1;
+      return out;
+    });
+  }
+
+  // Minimal .zip writer (stored, no compression): enough for a handful of HTML files
+  // and needs no library. Names are UTF-8 (general purpose flag bit 11).
+  var CRC_TABLE = (function () {
+    var t = new Uint32Array(256);
+    for (var n = 0; n < 256; n++) {
+      var c = n;
+      for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+  function crc32(bytes) {
+    var c = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  function makeZip(files) {
+    var enc = new TextEncoder(), parts = [], central = [], offset = 0;
+    var d = new Date();
+    var dosTime = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+    var dosDate = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    files.forEach(function (f) {
+      var name = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data);
+      var h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true);
+      h.setUint16(8, 0, true); h.setUint16(10, dosTime, true); h.setUint16(12, dosDate, true);
+      h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true);
+      h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+      parts.push(h.buffer, name, data);
+      var c = new DataView(new ArrayBuffer(46));
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true);
+      c.setUint16(10, 0, true); c.setUint16(12, dosTime, true); c.setUint16(14, dosDate, true);
+      c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true);
+      c.setUint16(28, name.length, true); c.setUint32(42, offset, true);
+      central.push(c.buffer, name);
+      offset += 30 + name.length + data.length;
+    });
+    var size = central.reduce(function (s, p) { return s + p.byteLength; }, 0);
+    var e = new DataView(new ArrayBuffer(22));
+    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
+    e.setUint32(12, size, true); e.setUint32(16, offset, true);
+    return new Blob(parts.concat(central, [e.buffer]), { type: 'application/zip' });
+  }
+
+  exportBtn.onclick = async function () {
+    var boards = selectedAll.length ? selectedAll.slice() : (selected ? [selected] : []);
+    var out = await buildHtml(boards);
+    if (!out) return;
+    var res = out.results;
+    var notes = res.reduce(function (s, r) { return s + (r.warnings || []).length; }, 0);
+    var failedNote = out.failed.length ? ' ' + out.failed.length + ' could not be exported (see the Claude tab log).' : '';
+    if (boards.length === 1) {
+      saveFile(new Blob([res[0].html], { type: 'text/html;charset=utf-8' }), res[0].fileName);
+      setExportProgress('Saved ' + res[0].fileName + ' (' + formatSize(res[0].bytes) + ').' + notesHint(notes), 'ok');
+      return;
+    }
+    var names = uniqueNames(res.map(function (r) { return r.fileName; }));
+    var zip = makeZip(res.map(function (r, i) { return { name: names[i], text: r.html }; }));
+    var zipName = ((selectedPage.trim() || 'Boards').replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim()) + ' - ' + res.length + ' boards.zip';
+    saveFile(zip, zipName);
+    setExportProgress('Saved ' + zipName + ' with ' + res.length + ' HTML files (' + formatSize(zip.size) + ').' + failedNote + notesHint(notes),
+      out.failed.length ? 'error' : 'ok');
   };
 
   // Recording a new shortcut, or pressing the current one (= Download .html).
@@ -1964,8 +2072,10 @@ async function rasterizeInPage(rasters, elements, svgs) {
   renderShortcut();
 
   copyBtn.onclick = async function () {
-    var res = await buildHtml();
-    if (!res) return;
+    if (selectedAll.length > 1) return;
+    var out = await buildHtml(selected ? [selected] : []);
+    if (!out) return;
+    var res = out.results[0];
     // navigator.clipboard is blocked in plugin windows; execCommand still works.
     var ta = document.createElement('textarea');
     ta.value = res.html;

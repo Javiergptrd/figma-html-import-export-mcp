@@ -20,7 +20,7 @@ function post(msg) {
   figma.ui.postMessage(msg);
 }
 
-var PLUGIN_VERSION = '1.3.3';
+var PLUGIN_VERSION = '1.4.0';
 var SETTINGS_KEY = 'importSettings';
 var autoExportSent = false;
 
@@ -69,11 +69,16 @@ figma.on('selectionchange', function () {
 // What the "Export HTML" section of the plugin window shows.
 function selectionInfo() {
   var sel = figma.currentPage.selection;
-  var n = sel[0];
+  // Everything that can become HTML, in layer-panel order of selection.
+  var nodes = sel.filter(function (n) { return 'absoluteTransform' in n; }).map(function (n) {
+    return { id: n.id, name: n.name, type: n.type, width: Math.round(n.width || 0), height: Math.round(n.height || 0) };
+  });
   return {
     type: 'selection',
     count: sel.length,
-    node: n ? { id: n.id, name: n.name, type: n.type, width: Math.round(n.width || 0), height: Math.round(n.height || 0) } : null,
+    page: figma.currentPage.name,
+    node: nodes[0] || null,
+    nodes: nodes,
   };
 }
 
